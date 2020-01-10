@@ -1,0 +1,219 @@
+---
+title: 'Homework 6: approximate confidence intervals with the normal and t distribution'
+output:
+  html_document:
+    df_print: paged
+date: 'Due date: October 15, 2019'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We encourage you to use R as a calculator to solve these exercises. (As opposed to punching those numbers into your physical calculator). 
+
+## Confidence intervals for proportions
+
+Do textbook exercises 5.8, 5.12, 6.2, 6.8, 6.10,
+
+5.8
+
+Sample mean x = 0.52
+crtical z for the CI  2.575829
+standard error (SD) = 0.024
+
+the 99% confidence interval for the US adult twitter users who get some news on twitter is 45.82% and 58.18%
+
+5.12
+The General Social Survey asked the question:for how many days during the past
+30 days was your mental health, which includes stress, depression, and problems with emotions, not good?"
+Based on responses from 1,151 US residents, the survey reported a 95% confidence interval of 3.40 to 4.24
+days in 2010.
+(a) Interpret this interval in context of the data.
+
+95% of the multiple experiments has the interval at (3.40, 4.240)
+
+(b) What does 95% confiden mean? Explain in the context of the application.
+
+95% confident means that if the experiment procedue multiple times and the the there is a interval in that experiment. Let's say you wake up at 9:00 am or 9:10 am without any alarms. After many experiment this person conclude that 95% confidence interval of the wake up time is 9:00 am and 9:10am. 
+
+(c)Suppose the researchers think a 99% confidence level would be more appropriate for this interval. Will
+this new interval be smaller or wider than the 95% confidence interval
+99% confidence interval in this will be larger than the 95% confidence interval.
+
+(d)If a new survey were to be done with 500 Americans, do you think the standard error of the estimate
+be larger, smaller, or about the same.
+The standard error will be larger
+
+
+6.2
+a). True 
+b). False since the the statment is for sample means but not for the sample proportions
+c).
+Let P(p hat>0.85) = 0.85 - 0.77 / (sqrt(.77(1-.77)/60))
+      = 1 - P(z<= 1.47)
+      = 1 - 0.-708
+      = 0.0708
+Which is greater than 0.05
+there for violate the usual condition
+Therefore statment is false.
+d).
+Let P(p hat>0.85) = 0.85 - 0.77 / (sqrt(.77(1-.77)/120))
+                  = 1-P(z<= 2.08)
+                  = 1-0.9812
+                  = 0.0188
+Which is less than 0.05
+This satifies the usual condition
+Therefore statment is ture
+                  
+6.8
+
+a) Point estimate of parameter is 0.25
+b) n p = 1000 * 0.25 = 250 > 10
+c) 
+a = 0.05 , z(0.025) = 1.96
+z +- sqrt(p*(1-p)/n)
+0.25 +- 1.96*sqrt(0.25*(1-0.25)/10000)
+(0.22316,0.2768384)
+
+d) if we deviceded to use a higher confidence level then confidence. interal gets larger.
+
+e) if we use large sample size then interval decrease, which mean a more accuate esatimate of the population value.
+
+6.10
+
+a) 61% is a sample statistic since it is based on a sample of 1578 US resident.
+b)
+p hat = .61
+sample size n = 1578
+cofidence level 1 - a = 0.95
+level of sigificance a = 0.05
+p+- z sqrt(p(1-p)/n)
+0.61+- 1.96sqrt(((.61)(1-0.61))/1578)
+0.61+-0.02406577172
+(0.58593422827,0.63406577172)
+95% confident interval that US resident who think marijuana should be made legal is between 0.04524 and 0.5079
+
+c)
+np = 1578*.61 = 962.58
+n(1-p) = 1578(1-.61) = 615.42
+since both np and n(1-p) are least 10 and sample observations are indenpendent, the statistic sample proportion will be normally distributed.
+
+d) since lower limit of confidence interval is less than 0.5, less than 50% population is also a plausible value of true proportion. So majority of American is not justified.
+np
+
+
+## Confidence intervals
+
+Do textbook exercises 6.22, 6.30, 7.16, 7.18, 7.26
+6.22
+
+P(Z<=1.96) = 0.05
+Confidence interval
+=(0.08-0.088)+- 1.96(sqrt(0.08(1-.08)/11,545+(0.088(1-.088)/11,545))
+=-0.008 +- 0.0095
+= (-0.008-0.0095. 0.23 + 0.0386)
+=(-0.0175,0.0015)
+
+6.30
+No, because it's same the same sample population and not indenpendent obersavation.
+
+7.16
+
+a) True
+b) True
+c) False, only if it was depdent sample
+d) false, each observations are different.
+
+7.18
+a) paired
+b) paired
+c) Not paried
+
+
+
+7.26
+```{r}
+summary <- c('Mean', 'SD', 'n')
+auto <- c(44.51, 56.81, 23)
+manual <- c(13.32, 16.13, 23)
+
+df <- data.frame(summary,auto,manual); df
+mean.diff <- df$auto[1] - df$manual[1]
+se <- sqrt((((df$auto[2])^2/26) + ((df$m[2])^2/26)))
+t.value <- mean.diff/se; t.value
+p.value <- pt(t.value, df=25); p.value
+```
+
+## Various other problems
+
+Do textbook exercises: 7.6, 7.14, 7.22, 7.28, 7.30
+
+7.6
+
+symmetic Confidenc interval
+sample mean (x) = (65+77)/2 = 71
+x = 71
+
+Margin of error E = 1/2 x length of CI = (65-77)/2 = 6
+
+The critical value t0.05 =1.711
+
+E = t * s / sqrt(n)
+s = E/z * sqrt(n)
+s = 17.5336
+
+7.14
+standard devidation(s) = 250
+margin of error  E =25
+levvel of significance (a) = 0.10
+
+n = ((Z x s) /E )^2
+n = ((1.645 x250)/25)^2
+  = (16.45)^2
+  = 270.6
+  = 271
+b) if the confidence interval incresases, the sample size also increase.
+  
+
+7.22,
+sample size N = 200
+Mean  = -0.545
+Standard Deviation = 8.887
+x+- z * s/sqrt(n)
+-0.545 +- 1.96*8.887/sqrt(200)
+= (-1.777,0.687)
+
+We can conclude that 95% cofident thatt average differences between the reading and writing scores of all student are in the interval of (-1.777,0.687)
+
+c) The 95 % confidence interval contain zero value, so null hypothesis is not rejected. The confidence interval provides that there is not real difference in the avearage scores among students.
+
+
+
+
+7.28,
+```{r}
+summary <- c('Mean', 'SD', 'n')
+auto <- c(16.12, 3.58, 26)
+manual <- c(19.85, 4.51, 26)
+
+df <- data.frame(summary,auto,manual); df
+mean.diff <- df$auto[1] - df$manual[1]
+se <- sqrt((((df$auto[2])^2/26) + ((df$m[2])^2/26)))
+t.value <- mean.diff/se; t.value
+p.value <- pt(t.value, df=25); p.value
+```
+7.30
+```{r}
+summary <- c('Mean', 'SD', 'n')
+auto <- c(22.92, 5.29, 26)
+manual <- c(27.88, 5.01, 26)
+
+df <- data.frame(summary,auto,manual); df
+mean.diff <- df$auto[1] - df$manual[1]
+se <- sqrt((((df$auto[2])^2/26) + ((df$m[2])^2/26)))
+t.value <- mean.diff/se; t.value
+p.value <- pt(t.value, df=25); p.value
+```
+
+ 

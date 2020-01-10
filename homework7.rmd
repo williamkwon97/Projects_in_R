@@ -1,0 +1,225 @@
+---
+title: 'Homework 7: chi-square tests, ANOVA, revision'
+output:
+  html_document:
+    df_print: paged
+date: 'due date: October 22nd, 2019'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## Chi-square tests and ANOVA
+
+Textbook exercises: 6.34, 6.50, 7.38, 7.46
+
+Microhabitat factors associated with forage and bed sites of barking deer in Hainan Island, China were examined from 2001 to 2002. In this region woods make up 4.8% of the land, cultivated grass plot makes up 14.7% and deciduous forests makes up 39.6%. Of the 426 sites where the deer forage, 4 were categorized as woods, 16 as cultivated grassplot, and 61 as deciduous forests. The table below summarizes these data
+
+a) Write the hypotheses for testing if barking deer prefer to forage in certain habitats over others.
+
+Ho: Barking deer have no preference to certain habitats and that they have equal preference among them all.
+
+HA: Barking deer have a preference to certain habitats
+
+(=0.05)
+
+b)What type of test can we use to answer this research question?
+
+Chi square test.
+
+c)Check if the assumptions and conditions required for this test are satisfied.
+
+We assume that they are independent. There are 4 observed cases in the woods section,then check if the sameple size is greater or equal to 5, .048 * 426 = 20.448 which is greater or equal to 5.
+
+d)Do these data provide convincing evidence that barking deer pre- fer to forage in certain habitats over others? Conduct an appro- priate hypothesis test to answer this research question.
+```{r}
+habitats <- c(4, 16, 67, 345)
+expected <- c(20.45, 62.62, 168.70, 174.23)
+k <- length(habitats)
+df <- k - 1
+
+chi <- 0
+for(i in 1:length(habitats))
+{
+  chi <- chi + ((habitats[i] - expected[i])^2 / expected[i])
+}
+chi
+pVal <- pchisq(chi, df=df, lower.tail=FALSE)
+pVal
+```
+6.50
+Researchers conducted a study investigating the relationship between ca↵einated co↵ee consumption and risk of depression in women. They collected data on 50,739 women free of depression symptoms at the start of the study in the year 1996, and these women were followed through 2006. The researchers used questionnaires to collect data on ca↵einated co↵ee consumption, asked each individual about physician-diagnosed depression, and also asked about the use of antidepressants. The table below shows the distribution of incidences of depression by amount of ca↵einated co↵ee consumption
+
+What type of test is appropriate for evaluating if there is an association between co↵ee intake and depression?
+The Chi-square test for two-way tables is appropriate for evaluating if there is an association between coffee intake and depression.
+
+Write the hypotheses for the test you identified in part (a).
+H0: There is no association between caffeinated coffee consumption and depression.
+
+HA There is an association between caffeinated coffee consumption and depression.
+
+c) Calculate the overall proportion of women who do and do not sufer from depression.
+The overall proportion of women who do suffer from depression is 5.13%. The overall proportion of women who do not suffer from depression is 94.86%
+
+d) Identify the expected count for the highlighted cell, and calculate the contribution of this cell to the test statistic, i.e. (Observed Expected)2/Expected.
+```{r}
+k <- 5
+df <- k - 1
+Depressed <- 2607/50739
+cup2.6.week.depressed <- Depressed * 6617
+
+expCnt <- cup2.6.week.depressed
+cellContrib <- (373 - expCnt)^2 / expCnt
+cellContrib
+```
+e)The test statistic is 2 = 20.93. What is the p-value?
+```{r}
+pVal <- pchisq(20.93, df=df, lower.tail=FALSE)
+pVal
+```
+f) What is the conclusion of the hypothesis test?
+Based on the p-value of ~ 0.0003 is less than 0.05, I am rejecting null hypothesis and conclude there is an association between caffeinated coffee consumption and depression.
+
+g) One of the authors of this study was quoted on the NYTimes as saying it was “too early to recommend that women load up on extra co↵ee” based on just this study.64 Do you agree with this statement? Explain your reasoning.
+I agree that it was too early to make this recommendation. The study states is that there is a statistical difference. It does not necessarily imply that there is a clinical significant difference, which is what many are interested in.
+
+7.38
+a)
+
+Ho: u1=u2=u3=4=u5 
+Ha: At least one pair of means is the same
+
+b)
+
+Degrees of freedom due to treatments =5-1=4
+
+Degrees of freedom due to error=45-5=40
+
+c)
+
+Assume,alpha=0.05
+
+Since p<alpha we reject the null hypothesis and accept that at least one of the mean scores is different from the others.
+
+7.40
+
+
+H0: average score of all groups are same
+
+H1: average score varies across some (or all) groups
+
+
+
+test statistic,F = 1.87
+
+numerator degree of freedom = 7
+
+denominator degree of freedom = 189
+
+So P-value is 0.0766
+
+Pr(>F) = 0.0766
+
+
+
+Since P-value > 0.05 hence we fail to reject H0
+
+7.46
+a) F
+b) T
+c) T
+d) F
+
+
+
+
+Textbook exercises: 6.16, 7.5, 7.6, 7.12, 7.20(c),(e),(g), 7.32
+6.16
+```{r}
+n = (0.48 * (1 - 0.48)) / (0.02 / (qnorm(0.975)))^2; ceiling(n)
+n
+```
+ 7.5
+ 
+```{r}
+u = ( 21.015 + 18.985 ) / 2  #mean UI-LI.2 = 20
+#margin error 21.015-20 or 20-18.985 = 1.015
+#DF 36 - 1 = 2.03
+
+t_score <- qt(0.975, df = 35)
+#1.105 = 2.03 * ( sd / sqrt(36) )
+#1.105 = 2.03 * ( sd / 6)
+#sd = 3.266
+
+sd = sqrt(36) * 1.015 / t_score
+sd
+```
+ 7.6
+```{r}
+n <- 25
+x1 <- 65
+x2 <- 77
+
+SMean <- (x2 + x1) / 2
+n <- 25
+x1 <- 65
+x2 <- 77
+
+ME <- (x2 - x1) / 2
+df <- 25 - 1
+p <- 0.9
+p_2tails <- p + (1 - p)/2
+t_val <- qt(p_2tails, df)
+SE <- ME / t_val
+sd <- SE * sqrt(n)
+sd
+```
+ 7.12
+ a)
+H0 Police officers have not been exposed to a higher concentration of lead.
+
+HA Police officers appear to have been exposed to a higher concentration of lead. 
+b)
+Random: It does not say whether or not the officers were randomly sampled
+Normal: The sample distribution appears to be normal but still need more data to find out.
+Independent: Sample is large enogh to be indenpendent.
+c)
+```{r}
+n <- 52
+x1 <- 35
+x2 <- 124.32
+SD2 <- 37.74
+
+t_score <- ((x2-x1)/(37.4/sqrt(52)))
+t_score
+```
+ , 7.20(c),(e),(g),
+ (c) Create hypotheses appropriate for the following research 
+ 
+H0 The difference of average in between reading and writing equal zero
+
+HA The difference of average in between reading and writing does NOT equal zero
+e)
+```{r}
+sd_Diff <- 8.887
+mu_Dif <- -0.545
+n <- 200
+SE_Diff <- sd_Diff / sqrt(n)
+t_value <- (mu_Dif - 0) / SE_Diff
+df <- n - 1
+
+p <- pt(t_value, df = df)
+p
+```
+H0 The difference of average scores is equal to zero. 
+HA The difference of average scores is NOT equal to zero.
+Since the p-value is not less that 0.05, this implies that there is not rnough evidence that there is a difference in student’s reading and writing exam scores
+
+g)
+I would expect a confidence interval for the average difference between reading and writing scores to include 0 which mean that the difference is not in one side or another.
+ 7.32
+ a) F
+ b) T
+ c) F

@@ -1,0 +1,57 @@
+---
+title: 'Homework 8: Linear regression basics'
+output:
+  html_document:
+    df_print: paged
+date: 'due date: October 29th, 2019'
+---
+
+
+## Regression basics
+
+Textbook exercises: 8.6, 8.8
+
+## Interpreting R's output of a regression model
+
+In lecture 12, we investigated the relationship between math and read scores in the High School and Beyond survey. In this homework, you will take a closer look at the R's model output. 
+
+1. Load the dataset \texttt{hsb2} in R from the library \texttt{openintro}. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(openintro)
+
+```
+
+2. Produce a scatterplot of math vs read score. If we want to predict math scores based on read scores, which variabled should be on the $y$-axis?
+```{r}
+data(hsb2)
+plot(hsb2$math ~ hsb2$read)
+```
+
+If we want to predict math scores based on read scores, math score should be on the $y$-axis, 
+
+3. The following command fits a linear regression model $(math) = a +  b \times (read)$ to the data, and store the output in a variable called \texttt{model}
+
+Run this command, print the model, and write down the equation that R fitted to the data.
+
+(math)= 21.0382 + 0.6051 * (read)
+```{r}
+model <- lm(math ~ read, data =hsb2)
+model
+```
+
+4. Interpret the intercept ($a$) and the slope ($b$) in the context of this problem (ie: what do these numbers say about read scores and math scores?)
+
+$a$ - the average math score is 21.0382 when reading scores equal to 0.6051, .
+$b$ - represent the change of the math scores as the reading score increase.
+
+5. Adapt the code from lecture to plot the above equation on top of the scatterplot you had before. Based on this plot, do you think that the linear model is a good fit?
+```{r}
+data(hsb2)
+plot(hsb2$math ~ hsb2$read)
+hsb2.model = lm(math ~ read, data = hsb2)
+abline(hsb2.model$coef, col="red")
+```
+
+constant variance indenpdent since evenlyy distribute in line and there is a trend in the line. Therefore I think linear model is a good fit.

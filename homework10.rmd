@@ -1,0 +1,260 @@
+---
+title: 'Homework 10: Multiple regerssion'
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    fig_height: 8
+    fig_width: 8
+date: 'due date: Tuesday November 19th, 2019'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(openintro)
+
+```
+
+This homework guides you through building and selecting a regression model from start to finish. The dataset we will use is the \texttt{mammals} dataset from the library \texttt{openintro}. You can load this dataset with the commands 
+```{r}
+
+data(mammals)
+?mammals
+```
+
+# Descriptive analysis
+
+## Missing values 
+This dataset contains some missing values (denoted NA). Exclude all observations with an NA in one of the variables with the command:
+```{r}
+
+mammals2 <- mammals[rowSums(is.na(mammals)) == 0,]
+
+
+```
+
+This command saves the data subset to a new dataframe, texttt{mammals2}. 
+
+We shall do all computations on \texttt{mammals2}. 
+
+1. Explain why it is reasonable to exclude all observations with an NA in one of the variables. 
+
+
+outlieris an extreme value (much lower or higher than the rest) or missing value (denotedNAin R).They can be detected using descriptive statistics (e.g. boxplots). The usual threshold for an outlier is threestandard deviations from the mean. Outliers need to be analyzed individually to find out if they should beincluded in the regression or if they are irrelevant.
+
+# Regression
+
+We want to fit a linear regression model that can be used to predict TotalSleep. 
+
+2. Explain why Dreaming, NonDreaming and Species are BAD variables to include in this regression model.
+
+Because TotalSleep is the sum of nondreaming and dreaming , then it doesn't make sense to include it in the model.
+```{r}
+model <-lm(TotalSleep~Dreaming+NonDreaming, data = mammals2)
+plot(model)
+summary(model)
+```
+
+
+
+
+
+## Descriptive statistics and outliers
+
+3. Do a pairwise plot of TotalSleep vs the each of the remaining variables. For each plot, briefly describe what you see. 
+
+```{r}
+
+mammals2$TotalSleep.cat <- as.factor(mammals2$TotalSleep)
+
+plot(mammals2$TotalSleep ~ mammals2$BodyWt)
+mammals2.model = lm(TotalSleep ~ BodyWt, data = mammals2)
+abline(mammals2.model$coef, col="red")
+
+plot(mammals2$TotalSleep ~ mammals2$BrainWt)
+mammals2.model = lm(TotalSleep ~ BrainWt, data = mammals2)
+abline(mammals2.model$coef, col="red")
+
+
+plot(mammals2$TotalSleep ~ mammals2$LifeSpan)
+mammals2.model = lm(TotalSleep ~ LifeSpan, data = mammals2)
+abline(mammals2.model$coef, col="red")
+
+plot(mammals2$TotalSleep ~ mammals2$Gestation)
+mammals2.model = lm(TotalSleep ~ Gestation, data = mammals2)
+abline(mammals2.model$coef, col="red")
+
+plot(mammals2$TotalSleep ~ mammals2$Predation)
+mammals2.model = lm(TotalSleep ~ Predation, data = mammals2)
+abline(mammals2.model$coef, col="red")
+
+plot(mammals2$TotalSleep ~ mammals2$Exposure)
+mammals2.model = lm(TotalSleep ~ Exposure, data = mammals2)
+abline(mammals2.model$coef, col="red")
+
+plot(mammals2$TotalSleep ~ mammals2$Danger)
+mammals2.model = lm(TotalSleep ~ Danger, data = mammals2)
+abline(mammals2.model$coef, col="red")
+```
+BrainWt and BodyWt most of them are at first quartile. Life Span and Gestation mostly on first and second quartile. Preadation, Exposure, Dangers are pretty much evenly spready through the graph.
+
+4. Are there any outliers in any of the above variables? Explain why we should *not* exclude them from analysis at this stage. 
+
+There are some outliers in the above variables. For example for BodyWt there is one outlier data point near 2500, which is way off the best fit line and for BrainWt too at aroud 4500. This should be exclude it for more accurate prediction.
+
+
+
+
+## The initial model
+
+5. Treat Predation, Exposure and Danger as numericals. Run model1, the linear regression model with TotalSleep vs BodyWt, BrainWt, LifeSpan, Gestation, Predation, Exposure and Danger. Clearly show the R command that you use, and include the R's model summary. 
+```{r}
+
+mammals2$TotalSleep.cat <- as.factor(mammals2$TotalSleep)
+mammals2.model1 = lm(TotalSleep ~ BodyWt+BrainWt+LifeSpan+Gestation+Predation+Exposure+Danger, data = mammals2)
+mammals2.model1
+summary(mammals2.model1)
+
+
+```
+
+
+
+## Should a variable be treated as numerical or categorical?
+
+6. Treat Predation, Exposure and Danger as categoricals. Run model2, the linear regression model with TotalSleep vs BodyWt, BrainWt, LifeSpan, Gestation, Predation, Exposure and Danger. Clearly show the R command that you use, and include the R's model summary.
+```{r}
+
+mammals2$TotalSleep.cat <- as.factor(mammals2$TotalSleep)
+
+mammals2$Predation.cat <- as.factor(mammals2$Predation)
+mammals2$Exposure.cat <- as.factor(mammals2$Exposure)
+mammals2$Danger.cat <- as.factor(mammals2$Danger)
+
+
+mammals2.model2 = lm(TotalSleep ~ BodyWt+BrainWt+LifeSpan+Gestation+Predation.cat+Exposure.cat+Danger.cat, data = mammals2)
+mammals2.model2
+
+
+summary(mammals2.model2)
+```
+
+
+
+7. Compare model1 and model2: for each model:
+
+* write down the equation that R gives you
+
+
+model1 R Equation
+
+y= 17.1091251 + 0.66658*bodyWT + (-0.0009979)*brainWt + -0.0188108*LifeSpan + (-0.0188108)*Gestation + 2.3151350*Predation + 0.5844391*Exposure + -4.5375726*Danger 
+
+
+
+model2 R Equation
+
+y= 17.1091251 + 0.005295*bodyWT + (-0.001824)*brainWt + 0.002857*LifeSpan + (-0.019381)*Gestation + 4.611332 *Predation.cat1  + 6.876712  *Predation.cat3 + 9.985318 *Predation.cat4 + 9.471563 *Predation.cat5+ -0.777955*Exposure.cat2 +  -1.017955*Exposure.cat3 +  0.791349*Exposure.cat4 + 1.081892 *Exposure.cat5   + -5.842000*Danger.cat2 + -11.217196*Danger.cat3 + -12.621907 *Danger.cat4 + -18.079357*Danger.cat5
+
+
+
+* interpret all the coefficients and the $p$-values associated with the coefficients
+
+y indicate Total number of hours of sleep
+
+$a$ - the average of TotalSleep hours when other vaiable euqls to n numbers,
+$b,c,d,e,f,g,h$ - represent the change of the BodyWt, BrainWt, LifeSpan, Gestation, Predation, Exposure and Danger based on TotalSleep hours
+
+
+We see a lot of large p values for some variables, which indicate that these variables are irrelevant.
+
+* report the $R^2$ and adjusted $R^2$ of your model. What are the meaning of these values?
+
+R^2 value for model1 = 0.6548  adjusted R model1 0.5837 model2= 0.7389 adjusted R model2 = 0.5718
+
+R^2 value for model1 is 0.6548 and model 2 is 0.7389, which meean model 1 can explain 65.48% of the variance and model 2 can explain 73.89% of the varicance.
+
+* show the diagnostic plots. Say which, if any, of the regression model assuptions are violated
+```{r}
+par(mfrow=c(2,2))
+
+plot(mammals2.model1)
+plot(mammals2.model2)
+```
+
+model 2 violated indenpendent, normality and contance variance test.
+
+## Automated model selection
+
+Load the MASS library with the \texttt{library(MASS)} command.
+
+8. Do variable selection with the \texttt{stepAIC} command, starting with model1. Call this model1.AIC. Compare model1.AIC against model1: comment on the coefficients and the diagnostic plots. 
+---
+```{r}
+library(MASS)
+model1.aic <- stepAIC(mammals2.model1)
+model1.aic
+par(mfrow=c(2,2))
+plot(model1.aic)
+summary(model1.aic)
+
+```
+The new model1 produced by AIC threw out a lot of irrelevant variables. There is only a slight improvement in R2, but it is much simplerand every variable is significant.
+9. Do variable selection with the \texttt{stepAIC} command, starting with model2. Call this model2.AIC. Compare model2.AIC against model2: comment on the coefficients and the diagnostic plots.   
+```{r}
+
+model2.aic <- stepAIC(mammals2.model2)
+summary(model2.aic)
+par(mfrow=c(2,2))
+plot(model2.aic)
+
+```
+The new model2 produced by AIC threw out a lot of irrelevant variables. There is only a slight improvement in R2, but it is much simplerand every variable is significant.
+
+10. Which model amongst the above 4 is the best? (Give a brief justification). For the better model, summarize the relationship between TotalSleep and other attributes of a mammal.
+
+model1.aic is the best because it doesn't vioalte the assumption and also has the highest adjusted R^2 value BodyWt,Gestation and Danger is relevent to TotalSleep for mammals.
+
+## Build a better model
+
+11. Your TA George played with this data and obtained an adjusted $R^2$ of 0.6848 and a reasonable fit (with no dropping of any observations). Present a model that has an adjusted $R^2$ *at least as good*. For your model, shows the diagnostic plot, and provide interpretations for the coefficients.
+
+(Hint: try various transformations like the abalone case, or do piecewise fits like the teacher dataset in lecture. Use the intuition you built on the relationship between each $X$ variable and TotalSleep in question 3. to help you.)
+```{r}
+mammals2.model3 = lm(log(TotalSleep) ~ log(BodyWt)+log(BrainWt)+log(LifeSpan)+log(Gestation)+log(Predation)+log(Exposure)+log(Danger), data = mammals2)
+model3.aic <- stepAIC(mammals2.model3)
+summary(model3.aic)
+par(mfrow=c(2,2))
+plot(model3.aic)
+
+
+```
+The new coefficients for log(model 3) is siginificantly different that non log model 3 and has higher Adjusted R^2 value that is 0.6722.
+
+
+## Use model for prediction
+
+12. The species Homo Sapiens has the following attributes: BodyWt = 75, BrainWt =  1.4, LifeSpan = 77, Gestation = 268, Predation = 2, Exposure = 2, Danger = 2. Use your model to predict TotalSleep for this species. Is your prediction reasonable? Explain why or why not. 
+
+
+
+```{r}
+input = data.frame(
+  BodyWt = 75,
+  BrainWt = 1.4,
+  LifeSpan = 77,
+  Gestation = 268,
+  Predation = 2,
+  Exposure = 2,
+  Danger = 2
+  )
+
+  x = predict(model3.aic, input)
+  exp(x)
+```
+
+This is reasonable answer since human usually sleeps 7 to 9 hours and 7.657197 hours is in between.
+
+
+
+

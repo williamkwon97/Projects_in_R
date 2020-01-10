@@ -1,0 +1,111 @@
+---
+title: "Homework 3 -- Hypothesis testing basics"
+output:
+  html_document:
+    df_print: paged
+date: 'Due date: Tuesday September 24, 2019'
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Hypothesis testing by exact computations
+
+Write down the null, the alternative, the test, and compute the p-value for each of the following scenarios. 
+
+1. Amit claims that he can taste the difference between diet and regular soda. We gave Amit 10 cups to taste test, 5 of each type, but we did NOT tell Amit that there were 5 of each type. He got 8 cups right. Does the evidence support his claim? 
+
+Null - Either Amit guess randomly or not.
+Alternative -Amit can tell differnece between the reuglar coke and diet coke.
+Test - The each of the tests are independent from each other. Each time you have 50% of pick right. We can test the hypothesis by test by using binomial distribution testing that he pick S>=8.
+
+
+```{r}
+ p.true.value1 <- (choose(10,8)*(.5)**8*(.5)**2) +(choose(10,9)*(.5)**9*(.5)**1) +(choose(10,10)*(.5)**10)
+p.true.value1
+```
+
+
+
+2. Same as 1., but  we DID tell Amit that there were 5 of each type. (He still got 8 cups right). 
+
+Null - Either Amit guess randomly or not.
+Alternative - Amit can tell difference between the reuglar coke and diet coke .
+Test -In the second one, you are constrained by the fact that you can only pick diet 5 times and regular 5 times during each sample. So the trials are not indenpendent.
+we test find probability by 5 choose 4 right and 5 choose 5 right (S>=8) but pairs.
+```{r}
+p.true.value2 <- choose(5,4)^2/choose(10,5) + choose(5,5)^2/choose(10,5)
+p.true.value2
+
+```
+
+
+
+
+3. Same as 1., but we did not know about Amit's claim, and simply wanted to test whether he was guessing randomly or not. (He still got 8 cups right). 
+
+Null - Either Amit guess randomly or not.
+Alternative - Amit's not guess randomly
+Test -Caculate p- value for if Amit get right for  EXTREME(0,1,2,8,9,10)
+```{r}
+n = 10
+p = .5
+mean <- n*p
+distribution.from.mean <- 8 - mean
+p.true.value3 <- 1 -(pbinom(8-1, size =10, prob =0.5 )- pbinom(2,size =10, prob =0.5))
+p.true.value3
+```
+## Simulating data under the null
+
+4. For each of the above three scenarios, simulate 10 thousand datasets under the null hypothesis, and use your data to numerically approximate the $p$-value.
+
+Null - Simulate 10 thousand datasets for each scenario to find p-value and see if Amit guess randomly.
+Alternative - Amit's not guess random;y.
+Test - Test 10,000 times for each senarios and recalculate the p-Value.
+```{r}
+num.exp=10**4
+oneTrial <- rbinom(10* num.exp,1,0.5)
+trialmatrix <- matrix(oneTrial,nrow=num.exp)
+
+true.sequence <- c(1,1,1,1,1,0,0,0,0,0)
+count.by.row <- function(row)
+{
+  return(sum(true.sequence==row))
+}
+S <- apply(trialmatrix,1, count.by.row)
+p.hat1 <- sum(S>=8)/length(S)
+p.value1 <- (abs(p.hat1 - p.true.value1))
+p.hat1
+```
+
+```{r}
+one.guess <- c("D","D","D","D","D","R","R","R","R","R")
+num.exp <- 10**4
+data <- matrix(replicate(num.exp,sample(one.guess)), ncol = 10,
+               nrow = num.exp, byrow = T )
+true.seq <- c("D","D","D","D","D","R","R","R","R","R")
+count.correct <- function (row)
+{
+return(sum(row == true.seq))  
+}
+S <- apply(data, 1 , count.correct)
+p.hat2<- sum(S>=8)/length(S)
+p.hat2
+```
+```{r}
+num.exp=10**4
+oneTrial <- rbinom(10* num.exp,1,0.5)
+trialmatrix <- matrix(oneTrial,nrow=num.exp)
+
+true.sequence <- c(1,1,1,1,1,0,0,0,0,0)
+count.by.row <- function(row)
+{
+  return(sum(true.sequence==row))
+}
+S <- apply(trialmatrix,1, count.by.row)
+p.hat3 <- sum(S<=2,S>=8)/length(S)
+p.hat3
+```
+We concludes that P values are small so it's more likely null hypothesis are true, but it could be wrong.

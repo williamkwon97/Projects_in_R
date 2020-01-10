@@ -1,0 +1,140 @@
+---
+title: 'Homework 5: hypothesis testing in the wild'
+output:
+  html_document:
+    df_print: paged
+date: 'Due date: October 8, 2019'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## How surveys are done in real life
+
+In lecture 6 we looked at some data obtained from the PEW research center survey. Read the survey methodology at 
+
+*https://www.pewresearch.org/wp-content/uploads/2019/04/FT_19.04.10_SocialMedia2019_topline_methodology.pdf*
+
+and answer the following questions. 
+
+1. What are the population and sample ?
+
+adults in US
+
+2. What is the sampling method?
+
+Random digit dialing (landline and cell) to people speaking English or Spanish  if multiple adults in landline household, select youngest.
+
+3. Name at least TWO possible sampling bias this sample can have.
+
+Survey only people with phone, and people who speak only spanish or english.
+
+4. The PEW research center weighted their sample size. What does this mean, and why did they do it? 
+
+weighted their sample size mean assigns an adjustment weight to each survey respondent. Persons in under-represented get a weight larger than 1, and those in over-represented groups get a weight smaller than 1. They weigh their sample size because  It may cause some groups to be over- or under-represented. If such problems occur, no reliable conclusions can be drawn from the observed survey data, unless something has been done to correct for the lack of representativity.
+
+Hint: see their explanation of it here at: 
+*https://www.pewresearch.org/methods/u-s-survey-research/our-survey-methodology-in-detail/*
+
+## Critical reading of news in the media
+In this exercise, you will use the same method as Lecture 6 to critically assess the following claim. 
+
+
+Source: https://www.pewresearch.org/fact-tank/2019/05/16/facts-about-americans-and-facebook/
+
+Here are the steps.
+
+1. On what data is this claimed based on? (Name the survey source, provide link where available.)
+
+https://www.pewresearch.org/wp-content/uploads/sites/9/2015/04/PI_TeensandTech_Update2015_0409151.pdf
+
+https://www.pewinternet.org/wp-content/uploads/sites/9/2018/05/PI_2018.05.31_TeensTech_FINAL.pdf
+
+
+2. For each of the survey(s) involved, write down: 
+
+
+
+a. the population
+
+U.S. teens ages 13 to 17 2015 and U.S. teens ages 13 to 17 2018
+
+
+b. the sample
+2015 data came 1060 selected U.S. teens ages 13 to 17 for 2015 data and 2018 data came from selected 743 teens U.S. teens ages 13 to 17 from 2018
+
+
+c. the sampling method (is it simple random sample? stratified? cluster? something else?)
+
+CLuster sampling 
+
+d. name at least TWO possible biases. 
+
+Very limited age range
+not all teenagers have electronic devices.
+
+3. What is the summary statistics (table, numbers or graphs) the authors used to back-up their claim? Is it reasonable?
+
+Author claim that they are resasonable because they got data from all the US teenagers from 2015 and 2018
+
+4. Is what you see significant? Frame it as a hypothesis testing problem. Write down:
+
+a. the null hypothesis
+There is not siginificant change between Facebook user in 2015 and 2018
+
+b. the alternative hypothesis
+
+There is a  siginificant change between Facebook user in 2015 and 2018
+
+c. the test statistic you plan to use. 
+
+The overall average percentage for Facebook use was $\overline{d}=51\%$ for 2015 $\overline{d}=71\%$ for 2018 . A good test is measured by the value:
+\[ D = \sum_{i} |d_i - \overline{d}|  \]
+where $d_i$ are the percentages of use in different years. This measures the deviation from the population average.
+- $p$-value: Using the test statistic above, the $p$-value is:
+\[ p  = \mathbb{P}(D \geq d) \]
+- We can use the permutation test to compute an approximation to $p$.
+
+5. Carry out your hypothesis test above with the permutation test. Draw conclusions at 5\% significance level. 
+
+
+```{r}
+
+
+n.fb.15 <- 743
+n.fb.18 <- 1060
+rate.fb.15 <- 0.51
+rate.fb.18 <- 0.71
+n.fb.15.use <- round(n.fb.15*rate.fb.15)
+n.fb.18.use <- round(n.fb.18*rate.fb.18)
+
+data <- matrix(rep(c(1,1),n.fb.18.use), ncol =2, byrow =T )
+data.2 <- matrix(rep(c(1,0),n.fb.18-n.fb.18.use),ncol = 2, byrow =T)
+data.3 <- matrix(rep(c(0,1),n.fb.15.use), ncol = 2, byrow =T)
+data.4 <- matrix(rep(c(0,0),n.fb.15-n.fb.15.use), ncol = 2, byrow=T)
+
+data <- rbind(data, data.2,data.3, data.4)
+data <- as.data.frame(data)
+
+names(data) <- c("year", "use")
+rate.diff <- function(data){
+  fb.15.rate <- sum(data$use[data$year == 0])/n.fb.15
+  fb.18.rate <- sum(data$use[data$year == 1])/n.fb.18
+  return(abs(fb.15.rate-fb.18.rate))
+}
+
+shuffle <- function(){
+  year.shuffle <- sample(data$year)
+  fb.15.rate <- sum(data$use[year.shuffle == 0])/n.fb.15
+  fb.18.rate <- sum(data$use[year.shuffle == 1])/n.fb.18
+  return(abs(fb.15.rate-fb.18.rate))
+}
+
+m = 10**4
+T = replicate(m,shuffle())
+p.value <- sum( T >= rate.diff(data))/m
+p.value
+hist(T)
+```
+**Conclusion:** The calculated p value is 0, so we should reject $H_0$. Therefore there is a significant difference in facebook user range between 2015 and 2018. 

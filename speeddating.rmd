@@ -1,0 +1,138 @@
+title: "Homework 1 - Descriptive Statistics"
+date: "Due date: Tuesday September 10, 2019"
+output: pdf_document
+```{r setup, include=FALSE}knitr::opts_chunk$set(echo = TRUE)```
+
+1.	What is the rate of pairs who want to stay as partners?  Does this rate differ by gender pairing? (male/male, male/female vs female/male , ).
+
+This show male and male pairing table.Where is 0 is didn't want to pair and 1 is want to pair again.
+
+```{r}
+setwd("/Users/williamkwon/Documents/R project folder")
+data <- read.csv("speedPartner.csv", header = T)
+data$PersonID <- rep(c(1,2), dim(data)[1]/2)
+date.df <- reshape(data, idvar = "PairID", timevar = "PersonID", direction = "wide")
+select <- date.df$Gender.1 == "Male" & date.df$Gender.2 == "Male"
+date.df.mm <- date.df[select,]
+date.df.mm$outcome <- date.df.mm$Decision.1*date.df.mm$Decision.2
+table(date.df.mm$outcome)
+```
+
+This show male and femal pairing table.
+
+```{r}
+select <- date.df$Gender.1 == "Female" & date.df$Gender.2 == "Female"
+date.df.ff <- date.df[select,]
+date.df.ff$outcome <- date.df.ff$Decision.1*date.df.ff$Decision.2
+table(date.df.ff$outcome)
+```
+
+This shows male and female paring table
+
+```{r}
+select <- date.df$Gender.1 == "Female" & date.df$Gender.2 == "Male" | date.df$Gender.1 == "Male" & date.df$Gender.2 == "Female"
+sum(select)
+date.df.mf <- date.df[select,]
+date.df.mf$outcome <- date.df.mf$Decision.1*date.df.mf$Decision.2
+table(date.df.mf$outcome)
+```
+
+If female and male or male and female then 68.75% want to stay as pairs.If they are male and male 83.33% want to stick together.If they are female and female they want to stay 100%.
+
+2.	How well can people predict if the partner wants to stay with them? Is there a difference by gender?If female and female they want to pair again more than any other genders pair and male and male and female have the least desire to pair again.
+
+
+
+
+```{r}
+data$PersonID <- rep(c(1,2), dim(data)[1]/2)
+data$Gender <- as.character(data$Gender)
+date.df <- reshape(data, idvar = "PairID", timevar = "PersonID", direction = "wide")
+df1 <- date.df[,c("Gender.1", "PartnerYes.1","Decision.2")]
+df2 <- date.df[,c("Gender.2", "PartnerYes.2","Decision.1")]
+names(df1) <- c("Gender", "PartnerYes" , "PartnerDecision")
+names(df2) <- c("Gender", "PartnerYes" , "PartnerDecision")
+pairagain <- rbind(df1,df2)
+pairagain$Gender <-  as.factor(pairagain$Gender)
+pairagain$PartnerYes.recode <- cut(date.df$PartnerYes.1, 3, labels=c("No"," Maybe", "Yes"))
+mosaic(Gender ~PartnerYes.recode, data=pairagain)
+```
+
+So based on this graph they males are more likey to say they will predict pretty well but females are tend to unsure and put maybe.
+
+1. Run the following two commands to produce two mosaic plots of Decision and Gender.
+
+```{r}
+mosaic(Decision ~ Gender, data = data)
+```
+
+```{r}
+mosaic(Gender ~ Decision, data = data)
+```
+
+
+Thoes two plots are basically showing same conclusion but just flipped the axis.
+
+Are people more likely to say ‘yes’ to people they like, or to those who they think likes them? Choose one or two most appropriate plots and/or table, and form your conclusion.
+
+```{r}
+mosaic(Decision ~ PartnerYes , data = data)
+```
+
+```{r}
+mosaic(Decision ~ Like , data = data)
+```
+
+Based on Dicision vs PartnerYes and Decision vs Like People are more likely to say ‘yes’ to people they like than those who they think likes them.
+
+1.	In one plot, make two side-by-side boxplots of spam vs exclaim_mess. 
+
+```{r}
+library(ggplot2)
+library(vcd)
+library(openintro)
+data(email)
+?email
+email$spam <- as.factor(email$spam)
+ggplot(email, aes(x=spam,y = exclaim_mess)) + geom_boxplot()
+```
+
+2. In one plot, make two overlaid histograms of spam vs exclaim_mess. 
+```{r}
+ggplot(email, aes(x=exclaim_mess, fill = spam)) + geom_histogram(binwidth=20)
+```
+
+3. What do these plots reveal? What are some problems with these plots?
+
+Both plots reveal that less the The number of exclamation points in the email message would increase that email will be spam. The plot might have a problem since the numbers is too big so it’s hard to indicated than actual ratio of spam for exclaim_mess.
+
+
+Variable recoding
+Sometimes it is useful to recode variables. spam vs exclaim_mess is an example.
+
+1.Recode exclaim_mess into four values:  0, 1, 2, >= 3.  You can write your own code, or use R’s cut
+function, for example. Call this new variable exclaim_mess.recode.
+
+```{r}
+email$exclaim_mess.recode <- cut(email$exclaim_mess, breaks = c(-1,0,1,2,Inf),labels = c("less than 0","None","bigger than 1","At least 2"))
+ggplot(email, aes(x=exclaim_mess.recode,fill=exclaim_mess)) + geom_bar()
+```
+
+
+
+2. What is the type of the variable exclaim_mess.recode?
+
+```{r}
+class(email$exclaim_mess.recode)
+```
+It's factor.
+
+3. Produce a table and a mosaic plot of spam vs exclaim_mess.recode. What do they reveal?
+
+```{r}
+mosaic(spam ~ exclaim_mess.recode, data = email)
+```
+
+4.	Summarize the relationship between spam and exclaim_mess.recode in a couple of sentences.
+More the exclaim_mess recode there are less chance to emails are spam.
+

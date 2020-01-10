@@ -1,0 +1,295 @@
+---
+title: "Homework 4"
+output:
+  html_document:
+    df_print: paged
+date: 'Due date: October 1, 2019'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## (Tuesday HackR worksheet) The drawback of permutation tests
+
+Permutation tests give a numerical procedure to approximate a $p$-value. Its main drawback is that it is computationally expensive: often one has to average over a large number of simulations to get a reliable estimate of the $p$-value. This exercise demonstrates this point. The bottom line is: if you knew an exact formula for the $p$-value, you should *always* use it.
+
+Consider setup 2. of the soda taste test experiment from the last homework again. That is, the tester tasted 10 cups, knew that there were 5 of each type. Let $S$ be the number of cups that a taste tester got right under random guessing. 
+
+1. Write a function so that it takes an argument $m$ and
+  repeat the previous task $m$ times and return their outputs as a vector. That is, your function returns the output of $m$ independent simulations of $S$. Call your function \texttt{sodashuffle}.
+
+#let 1 = "R" and 0 = "D"
+```{r}
+sodashuffle <- function(m){  
+  
+  one.guess <- c("D","D","D","D","D","R","R","R","R","R")
+  num.exp <- m
+  data <- matrix(replicate(num.exp,sample(one.guess)), ncol = 10,
+               nrow = num.exp, byrow = T )
+  true.seq <- c("D","D","D","D","D","R","R","R","R","R")
+  count.correct <- function (row)
+  {
+  return(sum(row == true.seq))  
+  }
+  S <- apply(data, 1 , count.correct)
+  S
+}
+sodashuffle(6)
+```
+  
+2. Use \texttt{sodashuffle} to draw $n = 1000$ draws from the distribution of $S$. From this data, compute a numerical approximation $\hat{p}$ for $p := \mathbb{P}(S = 10)$. How far is this approximation from the true value of $p$, which is $1/252$? 
+```{r}
+p.hat.soda <- (sum(sodashuffle(1000) == 10))/1000
+p.hat.soda
+p.value.soda <- abs(((sum(sodashuffle(1000) == 10))/1000)-1/252)
+p.value.soda
+  
+  
+```
+P value are very small.
+3. Write a function to take $n$ (number of draws) as an argument, and return the error $|\hat{p} - p|$ when one performs step 2 with $n$ draws. 
+```{r}
+error <- function(n){abs(((sum(sodashuffle(n) == 10))/n)-1/252)}
+error
+```
+
+4. Write a function to take $r$ (the number of runs) AND $n$ (number of draws) as arguments, and a vector obtained from repeating the function in step 3 $r$ times.  
+```{r}
+repeat.error <- function(n,r){replicate(r,abs(((sum(sodashuffle(n) == 10))/n)-1/252))}
+repeat.error
+```
+  4. Plot your error distribution of $|\hat{p} - p|$ as a series of boxplots, one for each $n$, for $n = 2^5,2^6,2^7,2^8,2^9,2^{10},2^{11},2^{12},2^{13}$.
+box
+```{r}
+error.matrix <- cbind(replicate(30,error(2**5),replicate(30,error(2**6),replicate(30,error(2**6),replicate(30,error(2**7),replicate(30,error(2**8),replicate(30,error(2**9),replicate(30,error(2**10),replicate(30,error(2**11),replicate(30,error(2**12),replicate(30,error(2**13))))))))))))
+boxplot(error.matrix)
+
+```
+5. What can you conclude from this plot?
+error distribution of $|\hat{p} - p|$ very row, so p hat values are close to p true value, which mean an approximation was pretty accurate.
+
+## (Tuesday HackR worksheet) Titanic dataset. 
+You can find this under homework4/titanic.csv. Read the file description from homework4/titanic-descrip.txt
+Compare the survival rate between classes. Include an appropriate plot.
+```{r,message=FALSE,fig.align='center',fig.show='hold',fig.width=3,fig.height=3}
+library(ggplot2)
+library(vcd)
+library(openintro)
+setwd("/Users/williamkwon/Documents/R project folder")
+data <- read.csv("titanic.csv", header = T)
+table(data$survived, data$class)
+ggplot(data, aes(x=class,fill=survived)) + geom_bar()
+```
+crew(76%) and third class(death raito 75%) have less survival rates than first and second classes.
+
+1. Is there a significant difference in survival rate between classes? 
+
+
+```{r}
+#used tabale and tab find the rates
+counts <- c(325,285,706,885)
+rates <- c(.24,.62,.41,.25)
+survived.counts <- round(counts*rates)
+not.survived.count <- counts-survived.counts
+#table should have two variables: 
+#class group (numbered 1 - 4) and use (=1 if they survived, 0 if not).
+#matrices of titanic survival:
+not.survived.list <- list()
+for(i in c(1:4)){  
+  not.survived.list[[i]] <- matrix(rep(c(i,0),not.survived.count[i]),ncol=2,byrow=T)
+}
+#matrices of non titatnic survival:
+survived.list <- list()
+for(i in c(1:4)){  
+  survived.list[[i]] <- matrix(rep(c(i,1),survived.counts[i]),ncol=2,byrow=T)
+}
+#stack the individual matrices:
+data <- not.survived.list[[1]]
+for(i in c(2:4)){  
+  data <- rbind(data, not.survived.list[[i]])
+}
+for(i in c(1:4)){  
+  data <- rbind(data, survived.list[[i]])
+}
+```
+```{r}
+data <- as.data.frame(data)
+names(data) <- c("class.group","survived")
+data
+data.deviation <- function(data){  
+   
+  survived.by.class <- by(data$survived,data$class,sum)  
+  #turn this into a rate  
+  rate.by.class <- survived.by.class/counts  
+  #compute deviation   
+  average.rate <- sum(rate.by.class)/sum(counts)  
+  deviation <- sum(abs(rate.by.class-average.rate))  
+  return(deviation)
+}
+
+
+```
+```{r}
+shuffle <- function(){  
+  survived.shuffle <- sample(data$survived)  
+  #compute total use by age from the shuffled use  
+  survived.by.class <- by(survived.shuffle,data$class.group,sum)  
+  #turn this into a rate  
+  rate.by.survived <- survived.by.class/counts  
+  #compute deviation   
+  average.rate <- sum(survived.by.class)/sum(counts)  
+  deviation <- sum(abs(rate.by.survived-average.rate))  
+  return(deviation)
+}
+```
+There is a significant difference in survival rate between classes since p-value equal to zero. For example crew(76%) and third class(death raito 75%) have less survival rates that first and second classes.
+
+### Is there a significant difference in survival rate between classes? 
+
+2. Set up the problem as a hypothesis testing problem. State the Null, the Alternative, and the event E
+Null - There is no  difference in survive rate by the class.
+Alternative - There is a difference in survive rate by the class.
+Event - A good test is measured by the value:
+\[ D = \sum_{i} |d_i - \overline{d}|  \]
+where $d_i$ are the percentages of survival rate in each classes. This measures the deviation from the population average. $p$-value: Using the test statistic above, the $p$-value is:\[ p  = \mathbb{P}(D \geq d) \] - We can use the permutation test to compute an approximation to $p$. Then use $p$ to test Null hypothesis.
+
+
+3. Compute an estimation of the p-value using the *permutation test* (*NO* other tests accepted).
+```{r}
+m = 10**4
+D = replicate(m,shuffle())
+#calculate the actual data deviation
+d = data.deviation(data)
+p.value <- sum(D >= d)/m
+p.value
+```
+There is a significant difference in survival rate between classes since p-value equal to zero. For example crew(76%) and third class(death raito 75%) have less survival rates that first and second classes.
+
+
+
+
+
+4. Draw conclusions. 
+
+The calculated p value is 0, so we should reject $H_0$. Therefore there is a significant difference in survival rate between classes. 
+
+
+## Teacher dataset. 
+Consider the dataset ```teacher``` in the library ```OIdata```. This data set contains teacher salaries from 2009-2010 for 71 teachers employed by the St. Louis Public School in Michigan, as well as several other variables. Load the data in R with 
+```{r}
+library(OIdata)
+data(teacher)
+```
+for documentation, type 
+```{r}
+?teacher
+```
+1. Compare the distribution of base salary in *full time* teachers with BA vs MA. Include an appropriate plot. 
+```{r,message=FALSE,fig.align='center',fig.show='hold',fig.width=3,fig.height=3}
+fulltime <- subset(teacher,fte==1) 
+table(fulltime$degree, fulltime$base)
+ggplot(fulltime, aes(x= degree,fill=base)) + geom_bar()
+```
+
+### Do *full time* teachers with an MA start with a significantly higher *minimum* base salary compared to full time teachers with a BA?
+
+2. Set up the problem as a hypothesis testing problem. State the Null, the Alternative, and the event E
+Null -  full time teachers with an MA start with a no significantly higher minimum base salary compared to full time teachers with a BA.
+Alternative -  full time teachers with an MA start with a no significantly higher minimum base salary compared to full time teachers with a BA.
+E - Test - A good test is measured by the value:
+\[ D = \sum_{i} |d_i - \overline{d}|  \]
+where $d_i$ are the  higher minimum base salary between full time teachers by degree. This measures the deviation from the population average. $p$-value: Using the test statistic above, the $p$-value is:\[ p  = \mathbb{P}(D \geq d) \] - We can use the permutation test to compute an approximation to $p$. Then use $p$ to test Null hypothesis
+
+3. Compute an estimation of the p-value using the *permutation test*. (NO other tests accepted). 
+
+
+```{r}
+base.shuffle.min <- function(){
+  fake.base <- sample(fulltime$base)
+  fake.BA.min <- min(fake.base[fulltime$degree=="BA"])
+  fake.MA.min <- min(fake.base[fulltime$degree=="MA"])
+  fake.diff <- abs(fake.BA.min-fake.MA.min)
+  return(fake.diff)
+}
+#replicate it many times
+S.min <- replicate(10**4,base.shuffle.min())
+
+
+```
+
+```{r}
+abs.diff.min <- abs(min(fulltime$base[fulltime$degree=="BA"])-min(fulltime$base[fulltime$degree=="MA"]))
+p.hat.min <- sum(S.min>=abs.diff.min)/length(S.min)
+p.hat.min
+```
+
+4. Draw conclusions. 
+The calculated p value is small, although we should not reject $H_0$ completly. but there is a somewhat difference in full time teachers with an MA start with a no significantly higher minimum base salary compared to full time teachers with a BA. 
+
+
+### Is there a significant difference in the *standard deviation* of base salary between *full time* teachers with BA and teachers with MA?
+
+2. Set up the problem as a hypothesis testing problem. State the Null, the Alternative, and the event E
+
+Null -  full time teachers with an MA start with a no significantly in the standard deviation base salary compared to full time teachers with a BA.
+Alternative -  full time teachers with an MA start with a no significantly standard deviation base salary compared to full time teachers with a BA.
+Test - A good test is measured by the value:
+\[ D = \sum_{i} |d_i - \overline{d}|  \]
+where $d_i$ are the standard deviation base salary between full time teachers by degree. This measures the deviation from the population average. $p$-value: Using the test statistic above, the $p$-value is:\[ p  = \mathbb{P}(D \geq d) \] - We can use the permutation test to compute an approximation to $p$. Then use $p$ to test Null hypothesis.
+
+3. Compute an estimation of the p-value using the *permutation test*. (NO other tests accepted). 
+
+
+```{r}
+base.shuffle.sd <- function(){
+  fake.base <- sample(fulltime$base)
+  fake.BA.sd <- sd(fake.base[fulltime$degree=="BA"])
+  fake.MA.sd <- sd(fake.base[fulltime$degree=="MA"])
+  fake.diff <- abs(fake.BA.sd-fake.MA.sd)
+  return(fake.diff)
+}
+#replicate it many times
+S.sd <- replicate(10**4,base.shuffle.sd())
+
+```
+
+```{r}
+abs.diff.sd <- abs(sd(fulltime$base[fulltime$degree=="BA"])-sd(fulltime$base[fulltime$degree=="MA"]))
+p.hat.sd <- sum(S.sd>=abs.diff.sd)/length(S.sd)
+p.hat.sd
+```
+4. Draw conclusions. 
+The calculated p value is pretty high, although we should not agree on $H_0$ completly. but there is a little to no difference in full time teachers with an MA start with a no significantly higher minimum base salary compared to full time teachers with a BA.
+## Sampling 
+
+Do exercise 1.42 in the OpenIntro textbook.
+
+Screens, teens, and psychological well-being. In a study of three nationally representative large-
+scale data sets from Ireland, the United States, and the United Kingdom (n = 17,247), teenagers between
+the ages of 12 to 15 were asked to keep a diary of their screen time and answer questions about how they
+felt or acted. The answers to these questions were then used to compute a psychological well-being score.
+Additional data were collected and included in the analysis, such as each child's sex and age, and on the
+mother's education, ethnicity, psychological distress, and employment. The study concluded that there is
+little clear-cut evidence that screen time decreases adolescent well-being.35
+
+
+(a) What type of study is this?
+Observation
+
+(b) Identify the explanatory variables.
+
+teenagers between the ages of 12 to 15 who watch TV daily.
+
+(c) Identify the response variable.
+
+adolescent well-being
+
+(d) Comment on whether the results of the study can be generalized to the population, and why.
+The study can be generalized to the population since it tested on 3 different relativelylarge population countries.
+
+(e) Comment on whether the results of the study can be used to establish causal relationships.
+
+The study can be used to establish casual relationship since screen time can be affect by the mother's education, ethnicity, psychological distress, and employment.
+
+1.43 Stanford Open Policing. The Stanford Open Policing project gathers, analyzes, and releases records

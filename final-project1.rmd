@@ -1,0 +1,1005 @@
+---
+title: 'Final project: Is College Worth It?'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+date: 'Due date: December 9, 2019'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data description
+
+This dataset is an extract of two surveys conducted by the National Science Foundation (NSF) in 2013: the National Survey of College Graduates (SESTAT 2013) and Survey of Doctorate Recipients (SESTAT 2013). Information on the survey and sampling methods can be found here. 
+
+\url{https://highered.ipums.org/highered/survey_designs.shtml}
+
+The dataset is public and can be cited in your report as: Minnesota Population Center. IPUMS Higher Ed: Version 1.0 [dataset]. Minneapolis, MN: University of Minnesota, 2016. 
+https://doi.org/10.18128/D100.V1.0
+
+On Canvas, you would find the following files:
+
+* **data.formatted.csv**: the dataset downloaded from IPUMS Higher Ed, with missing or logical skips recoded to NA, the error in the variable CHTOT fixed. 
+
+* **dataset.RData**: an R workspace that contains data.formatted.csv pre-loaded as a dataframe called \texttt{dataset}, with each variable given the correct type. 
+
+
+It is recommended that you start with this file. 
+
+For regression you may find it convenient to recode some yes/no variables as a binary 1/0 numeric variable. 
+
+* **codebook-basic.txt**: a list of variables and the meaning of their values. Note that missing or logical skips have been recoded to NA. 
+
+* **codebook.xml**: an XML version of the codebook, with more detailed explanations on the variables and hyperlinks. You can open this in your browser. 
+
+* **final-project.rmd / final-project.pdf**: instructions and questions
+
+The goals of this analysis are following.
+
+* Give a general description of the work landscape for those with a college degree in the US, as surveyed in 2013
+
+* Build a regression model to predict annual salary
+
+* Build a regression model to predict job satisfaction
+
+* Use our analysis to fact-check news outlets. 
+
+* Convey our findings in a technical report and in plain terms. 
+
+## General instructions on formatting
+You should hand in two files in total: an rmd file and a pdf file.
+
+However, it should look less like homework and more like a professional report. 
+
+A good standard are the PEW research reports, such as this:
+
+https://www.pewsocialtrends.org/2014/02/11/the-rising-cost-of-not-going-to-college/
+
+Here is what the lay summary from that article looks like
+
+https://www.pewresearch.org/fact-tank/2014/02/11/6-key-findings-about-going-to-college/
+
+Please answer all questions asked and write in full sentences with good formatting (eg: clear paragraphs). 
+
+For hypothesis testing, use 95% significance level unless otherwise specified. 
+
+\newpage
+# The Report
+
+Your report should contain the same headings as the sections below. Under each heading, put answers to these questions.
+
+For each question/bullet, summarize in ONE paragraph, with appropriate plots and/or numbers/tables.
+
+## Basic analysis. 
+
+### Population and sampling
+
+1. This dataset consists of two different surveys. Briefly describe the population, the sample, and the sampling method for each of the surveys. Name TWO possible biases that each sample can have. Do we introduce further biases when we analyze the results of these surveys together (ie: treat it as one big dataset)?
+
+Population of two different
+```{r}
+rm(list = ls())
+load("dataset.RData")
+model1 <- lm(SALARY ~ NBAMEMG, data = dataset)
+summary(dataset)
+
+```
+
+population-
+The National Survey of College Graduates is a survey of individuals residing in the United States, under the age of 76, who hold a bachelor's degree or higher and The Survey of Doctorate Recipients collects information from individuals under the age of 76 who received a doctorate degree from a US institution.
+
+sample-
+
+Each year, the NSCG includes between 77,000 (in 2010) and 150,000 respondents (in 1993). According to the National Research Council (2008)
+
+since 1973 to 2013the SDR is fielded every 2 to 3 years, and on average includes 47,000 records. Response rates range from above 80 percent in the 1990's to approximately 76 percent in the 2013 SDR survey
+
+sapleing method-
+The sample design is essentially a two-stage sampling scheme. Census long-form households in 1990 and 2000, and ACS households in 2010 were selected using a stratified systematic sampling method. Then, respondents for the NSCG surveys were chosen from individuals in the target population from long-form or ACS households using a stratification sampling scheme using age, race, highest degree type, occupation, and sex.
+
+
+Bias 1 and 2 =
+
+Only selected ACS household instead of every households.
+
+Only target population from long form.
+
+### Demographics
+
+2. Summarize the demographics of the survey. 
+Specifically, you should describe the distribution of gender, minority, race/ethnicity, and total number of children. 
+
+```{r}
+table(dataset$GENDER)
+table(dataset$MINRTY)
+table(dataset$RACETH)
+
+plot(dataset$GENDER)
+plot(dataset$MINRTY)
+plot(dataset$RACETH)
+
+summary(dataset$GENDER)
+summary(dataset$MINRTY)
+summary(dataset$RACETH)
+```
+Legend of graph and table
+ GENDER		
+01		Female
+02		Male
+ MINRTY		
+00		No
+01		Yes
+ RACETH		Race/ethnicity
+01		Asian
+02		White
+03		Under-represented minorities
+04		Other
+
+We can conclude there are more male, non-minority,and white group are majority.
+### Education
+
+3. Summarize the distribution of highest degrees and bachelor degrees by field and year obtained obtain. 
+```{r}
+table(dataset$BA03Y5)
+table(dataset$NBAMEMG)
+table(dataset$HD03Y5)
+table(dataset$NDGMEMG)
+
+library(ggplot2)
+library(vcd)
+boxplot(as.numeric(dataset$BA03Y5)~dataset$NBAMEMG)
+boxplot(as.numeric(dataset$HD03Y5)~dataset$NDGMEMG)
+
+```
+key of graph
+BA03Y5- Year of first bachelor degree 
+NBAMEMG- Field of major for first bachelor degree
+01		Computer and mathematical sciences
+02		Life and related sciences
+03		Physical and related sciences
+04		Social and related sciences
+05		Engineering
+06		Science and engineering-related fields
+07		Non-science and engineering fields
+09		Other categories
+96		Blank
+98		Logical Skip
+99		Missing
+HD03Y5- HD03Y5		Year of highest degree 2003-onward
+NDGMEMG- Field of major for first bachelor degree 
+02		Life and related sciences
+03		Physical and related sciences
+04		Social and related sciences
+05		Engineering
+06		Science and engineering-related fields
+07		Non-science and engineering fields
+09		Other categories
+96		Blank
+98		Logical Skip
+99		Missing
+
+4. The retention rate of a field is the rate at which people with a bachelor degree in this field would do a higher degree in the same field. Is there a significant difference in retention rates among different field of majors?
+
+Hypothesis - There is not a significant difference in retention rates among different field of majors.
+
+Alternative - There is a significant difference in rentention rates among different field of major
+
+Test - Use chi sq test to see difference in rententionr rates among different field of major
+
+```{r}
+
+dataset$NBAMEMG[dataset$NBAMEMG == "9" | dataset$NBAMEMG == "96"] <- NA
+dataset$NBAMEMG <- droplevels(dataset$NBAMEMG) 
+higherdegree <- subset(dataset, DGRDG!=1)
+
+samedegree <- subset(higherdegree, NBAMEMG == NDGMEMG)
+notsamedegree <- subset(higherdegree, NBAMEMG != NDGMEMG)
+
+
+samedegree.tb <- table(samedegree$NBAMEMG)
+notsamedegree.tb <- table(notsamedegree$NBAMEMG)
+total <- rbind(samedegree.tb, notsamedegree.tb)
+total <- total[,-9]
+row.sum=apply(total,1,sum)
+col.sum=apply(total,2,sum)
+expected = row.sum %*% t(col.sum)/ sum(col.sum)
+names(dimnames(total)) <- c("Retention", "Degree Field")
+total
+
+chi.sq = sum((total-expected)**2/expected)
+p.value = 1-pchisq(chi.sq,df=7)
+p.value
+
+
+
+
+
+```
+since p- value is less that 0.05 we can conclude that There is a significant difference in rentention rates among different field of major.
+
+
+### Job status
+
+5. What does the labor force look like?
+* Describe general statistics: % of people working, % working part-time, number of hours per week and number of weeks per year. 
+* Do most people work in short bursts (few weeks but high number of hours per week), or do most people work with regular hours year-round? 
+* What are the major reasons that led people to not work at the time of survey?
+```{r}
+table(dataset$LFSTAT)
+plot(dataset$LFSTAT, main="Labor plot")
+table(dataset$HRSWKGR)
+plot(dataset$HRSWKGR, main="Hours per week")
+table(dataset$WKSWKGR)
+plot(dataset$WKSWKGR, main="weeks salary based on year ")
+
+Parttime <- subset(dataset, HRSWKGR==1 | HRSWKGR==2  )
+
+table(dataset$PTFAM)
+table(dataset$PTNOND)
+table(dataset$PTOCNA)
+
+
+```
+Labor plot x axis - 1 Employed,2	Unemployed ,3 Not in the labor force
+hours per week x axis - 1		20 or less,2		21 - 35, 3		36 - 40,4		Greater than 40
+weeks salary based on year -1		1-10 weeks,2	11-20 weeks,3		21-39 weeks,4		40-52 weeks
+
+most people work in short bursts (few weeks but high number of hours per week)
+
+85.14% of people working
+15.76% working part-time,
+
+Major of them want to work but could not find the job.
+
+6. Degree relevance
+* How relevant are the people's degree to their principle job? (Do people work in the field that they were trained for, or do they work in unrelated areas?). 
+
+Null Hypothesis -  There is not a significant difference in relevance in between people's degree to principle job.
+Allternative - There is not a significant difference in releavance in between people's degree to principle job.
+Test - Use chi sq test to see relationshiple between people's degree to principle job/
+
+```{r}
+dataset$relevent <-0
+dataset$relevent[dataset$OCEDRLP ==3 ] <- 1
+dataset$OCEDRLP <- as.factor(dataset$relevent)
+
+100*prop.table(table(dataset$relevent))
+
+
+```
+
+
+
+* Is there a statistically significant difference in relevance of 
+  -degree vs - job type
+```{r}
+
+chisq.test(dataset$NDGMEMG, dataset$OCEDRLP)
+```
+Since P value is smaller than 0.05 we can say the type of job that people do is related.
+  - the degree that they are trained for, and
+```{r}
+
+chisq.test(dataset$OCEDRLP, dataset$MGRNAT)
+chisq.test(dataset$OCEDRLP, dataset$MGROTH)
+```
+Since P value is smaller than 0.05 we can say the type of job that people do is related.
+  - the type of job that people do? 
+```{r}
+
+
+chisq.test(dataset$OCEDRLP, dataset$WASCSM)
+```
+Since P value is smaller than 0.05 we can say the type of job that people do is related.
+
+
+Note: state the tests you use, p-value and draw conclusions. 
+You may find the variables MGRNAT, MGROTH, MGRSOC, NOCPRMG, OCEDRLP, NDGMEMG, WAPRSM and WASCSM relevant. 
+
+7. Job satisfaction
+* Summarize overall job satisfaction
+
+```{r}
+table(dataset$JOBSATIS)
+100*prop.table(table(dataset$JOBSATIS))
+```
+
+
+
+```{r}
+jobsatisfied <- 0
+dataset$jobsatisfied[dataset$JOBSATIS[] == 1 | dataset$JOBSATIS[] == 2] <- 0
+dataset$jobsatisfied[dataset$JOBSATIS[] == 3 | dataset$JOBSATIS[] == 4] <- 1
+satisfication <- function(satifaction.type) {
+  return(table(dataset$jobsatisfied,satifaction.type)[1,1])
+}
+
+table(dataset$jobsatisfied,dataset$SATADV)
+```
+* Among those who reported "somewhat/very satisfied", which aspects of their jobs are they most satisfied with? Among those who reported "somewhat/very dissatisfied", which aspects of their jobs are they least satisfied with? 
+```{r}
+summary(dataset$JOBSATIS)
+```
+
+Based on table we can calculate taht about 89.60% people are satified and 10.399967% people are not satisfied with job.
+ 
+```{r}
+func.satisfication <- function(satisfication.type) {
+  return(table(dataset$jobsatisfied,satisfication.type)[1,1])
+}
+
+
+func.satisfication(dataset$SATADV)
+func.satisfication(dataset$SATBEN)
+func.satisfication(dataset$SATCHAL)
+func.satisfication(dataset$SATIND)
+func.satisfication(dataset$SATLOC)
+func.satisfication(dataset$SATRESP)
+func.satisfication(dataset$SATBEN)
+func.satisfication(dataset$SATCHAL)
+func.satisfication(dataset$SATIND)
+func.satisfication(dataset$SATLOC)
+func.satisfication(dataset$SATRESP)
+func.satisfication(dataset$SATSAL)
+func.satisfication(dataset$SATSEC)
+func.satisfication(dataset$SATSOC)
+```
+
+```{r}
+func.dissatisfication <- function(satisfication.type) {
+  return(table(dataset$jobsatisfied,satisfication.type)[2,4])
+}
+
+
+func.dissatisfication(dataset$SATADV)
+func.dissatisfication(dataset$SATBEN)
+func.dissatisfication(dataset$SATCHAL)
+func.dissatisfication(dataset$SATIND)
+func.dissatisfication(dataset$SATLOC)
+func.dissatisfication(dataset$SATRESP)
+func.dissatisfication(dataset$SATBEN)
+func.dissatisfication(dataset$SATCHAL)
+func.dissatisfication(dataset$SATIND)
+func.dissatisfication(dataset$SATLOC)
+func.dissatisfication(dataset$SATRESP)
+func.dissatisfication(dataset$SATSAL)
+func.dissatisfication(dataset$SATSEC)
+func.dissatisfication(dataset$SATSOC)
+```
+So among the people who answererd very satisfied and somewhat satisfied in job satisfaction.
+SATIND satisfaction degree of indenpendece is highest compare to all other scores, which mean this is most important to job satisfication.
+
+So among the people who answererd very dissatisfied and somewhat dissatisfied in job satisfaction.
+SATIND satisfaction(opportunities for advancement) is highest compare to all other scores, which mean this is most important to job dissatisfication.  
+
+* Base on the above, which factors are most important to job satisfaction?
+```{r}
+
+
+
+func.satisfication(dataset$SATADV)/87655+func.dissatisfication(dataset$SATADV)/10396
+func.satisfication(dataset$SATIND)/87655+func.dissatisfication(dataset$SATIND)/10396
+func.satisfication(dataset$SATLOC)/87655+func.dissatisfication(dataset$SATLOC)/10396
+func.satisfication(dataset$SATRESP)/87655+func.dissatisfication(dataset$SATRESP)/10396
+func.satisfication(dataset$SATBEN)/87655+func.dissatisfication(dataset$SATCHAL)/10396
+func.satisfication(dataset$SATIND)/87655+func.dissatisfication(dataset$SATIND)/10396
+func.satisfication(dataset$SATLOC)/87655+func.dissatisfication(dataset$SATLOC)/10396
+func.satisfication(dataset$SATRESP)/87655+func.dissatisfication(dataset$SATRESP)/10396
+func.satisfication(dataset$SATSAL)/87655+func.dissatisfication(dataset$SATSAL)/10396
+func.satisfication(dataset$SATSAL)/87655+func.dissatisfication(dataset$SATSAL)/10396
+func.satisfication(dataset$SATSEC)/87655+func.dissatisfication(dataset$SATSEC)/10396
+func.satisfication(dataset$SATSOC)/87655+func.dissatisfication(dataset$SATSOC)/10396
+
+```
+To calculate I use equation  that is people who satisfied for each catagory/total people satisfied +
+people who dissatisfied for each catagory/total people who dissatisfied to find which factors are most important to job satisfaction.
+SATIND - satisfication on degree of indenpendence is most important factor.
+
+## Regression 1: SALARY vs other variables
+
+Build a linear regression model to predict SALARY based on the other relevant variables. 
+
+1. Detail how you did variable selection: which models did you run, why did you discard certain models or variables, any variable transformations or recoding you did and why, which diagnostic tests did you run and what they showed, justifications if you removed outliers.  How did you decide to deal with missing values in this dataset?
+
+I discard certain variables because I thought it wasn't relevent to the salary. For example there is no need to include variables like NWOTP and NEWSTU since those are Reasons for not working: illness, retired or other (combined) and Reasons for not working: student which mean they are unemployed and 
+no need to include in my model. I used liner regression model to test to predicting salary. Also itw wasn't necessary to remove outliers since my model R^2 value is good without removing the outliers . Since the graph look okay I decide I do not need to deal with missing value.
+
+```{r}
+library(MASS)
+load("dataset.RData")
+
+
+
+model.lm <- lm(SALARY ~ GENDER + MINRTY + RACETH + CHU2IN + CH25IN + CH611IN + CH1218IN + CH19IN + BA03Y5 + NBAMEMG + BADGRUS + DGRDG +NDGMEMG  +HRSWKGR +WKSWKGR+ JOBINS +JOBPENS + JOBVAC + FTPRET + as.factor(OCEDRLP) + NOCPRMG +EMSEC + WAPRSM +WASCSM + SATADV + SATBEN + SATCHAL + SATRESP + SATSAL + SATSEC +SATSOC + MGRNAT + MGROTH + MGRSOC , data = dataset)
+
+
+summary(model.lm)
+```
+
+```{r}
+
+model1 <- lm(SALARY ~ YEAR , data = dataset)
+summary(model1)
+
+model2 <- lm(SALARY ~WEIGHT , data =dataset)
+summary (model2)
+
+
+model3 <- lm(SALARY ~AGE , data =dataset)
+summary (model2)
+
+
+model4 <- lm(SALARY ~GENDER , data =dataset)
+summary (model4)
+
+model5 <-  lm(SALARY ~ MINRTY, data =dataset)
+summary (model5)
+
+model6 <- lm(SALARY ~ RACETH , data =dataset)
+summary (model6)
+
+model7 <- lm(SALARY ~ CHU2IN , data =dataset)
+summary (model7)
+
+model8 <- lm(SALARY ~ CH25IN, data =dataset)
+summary (model8)
+
+model9 <- lm(SALARY ~ CH25IN , data =dataset)
+summary (model9)
+
+model10 <- lm(SALARY ~ CH1218IN , data =dataset)
+summary (model10)
+
+model11 <- lm(SALARY ~ CH19IN , data =dataset)
+summary (model11)
+
+model12 <- lm(SALARY ~ BA03Y5 , data =dataset)
+summary (model12)
+
+model13 <-  lm(SALARY ~ NBAMEMG , data =dataset)
+summary (model13)
+
+model14 <- lm(SALARY ~ BADGRUS , data =dataset)
+summary (model14)
+
+model15 <- lm(SALARY ~  DGRDG, data =dataset)
+summary (model15)
+
+model16 <- lm(SALARY ~  NDGMEMG, data =dataset)
+summary (model16)
+
+model17 <- lm(SALARY ~ HRSWKGR , data =dataset)
+summary (model17)
+
+model18 <- lm(SALARY ~WKSWKGR , data =dataset)
+summary (model18)
+
+model19 <- lm(SALARY ~JOBINS , data =dataset)
+summary (model19)
+
+model20 <- lm(SALARY ~ JOBPENS , data =dataset)
+summary (model20)
+
+
+model21 <- lm(SALARY ~ JOBPROFT , data =dataset)
+summary (model21)
+
+model22 <- lm(SALARY ~ JOBVAC, data =dataset)
+summary (model22)
+
+
+model23 <- lm(SALARY ~  FTPRET, data =dataset)
+summary (model23)
+
+
+model24 <- lm(SALARY ~ PTWTFT , data =dataset)
+summary (model24)
+
+
+model25 <- lm(SALARY ~PTFAM  , data =dataset)
+summary (model25)
+
+
+model26 <- lm(SALARY ~ PTNOND , data =dataset)
+summary (model26)
+
+
+model27 <- lm(SALARY ~PTOCNA , data =dataset)
+summary (model27)
+
+
+model28 <- lm(SALARY ~ PTOTP, data =dataset)
+summary (model28)
+
+
+model29 <- lm(SALARY ~NOCPRMG , data =dataset)
+summary (model29)
+
+
+model30 <- lm(SALARY ~ NOCPRMG, data =dataset)
+summary (model30)
+
+model31 <- lm(SALARY ~EMSEC  , data =dataset)
+summary (model31)
+
+
+model32 <- lm(SALARY ~WAPRSM , data =dataset)
+summary (model32)
+
+
+model33 <- lm(SALARY ~WASCSM , data =dataset)
+summary (model33)
+
+model34 <- lm(SALARY ~NRREA , data =dataset)
+summary (model34)
+
+model35 <- lm(SALARY ~ NRSEC , data =dataset)
+summary (model35)
+
+
+
+
+model36 <- lm(SALARY ~ SATADV , data =dataset)
+summary (model36)
+
+model37 <- lm(SALARY ~ NRSEC , data =dataset)
+summary (model37)
+
+model38 <- lm(SALARY ~  SATCHAL , data =dataset)
+summary (model38)
+
+model39 <- lm(SALARY ~  SATLOC , data =dataset)
+summary (model39)
+
+model40 <- lm(SALARY ~ SATRESP , data =dataset)
+summary (model40)
+
+model41 <- lm(SALARY ~ SATSAL , data =dataset)
+summary (model41)
+
+model42 <- lm(SALARY ~ MGRNAT  , data =dataset)
+summary (model42)
+
+model43 <- lm(SALARY ~ MGROTH , data =dataset)
+summary (model43)
+
+model44 <- lm(SALARY ~ MGRSOC , data =dataset)
+summary (model44)
+
+
+
+```
+
+2. Call your final regression model \texttt{model.lm}. Clearly show your final regression model: the R command, and the R output summary. Write down the equation that R gives you. Interpret all the coefficients and the $p$-values associated with the coefficients. 
+
+```{r}
+
+model.lm <- lm(SALARY ~ GENDER + MINRTY + RACETH + CHU2IN + CH25IN + CH611IN + CH1218IN + CH19IN + BA03Y5 + NBAMEMG + BADGRUS + DGRDG +NDGMEMG  +HRSWKGR +WKSWKGR+ JOBINS +JOBPENS + JOBVAC + FTPRET + as.factor(OCEDRLP) + NOCPRMG +EMSEC + WAPRSM +WASCSM + SATADV + SATBEN + SATCHAL + SATRESP + SATSAL + SATSEC +SATSOC + MGRNAT + MGROTH + MGRSOC , data = dataset)
+
+plot(model.lm)
+summary(model.lm)
+```
+
+Equation will be y(Salary)=      1691.830 + 5513.518(GENDER2) + -5517.048(MINRTY1)+(all the variable in summary(model.lm)*(ESTIMATE)) ...-1573.40(MGRSOC1)
+the coefficients indicate a decrease and increase if they are negative and positive.The p-value indicate the accuracy of the specific variables . Higher the p-value, variables are more likely not reliable. 
+
+
+3. Report the $R^2$ and adjusted $R^2$ of your model. What are the meaning of these values? Run a diagnostic plot for your model. Is your model a good fit? Is it easy to interpret? 
+
+R-squared 0.5697
+Adjusted R-Squared 0.56888
+
+R-squared balue explained the sqaure of the correlation between x and y.
+It is a good fit because it passed all diagonostic test.
+It's easy to predicing base on this model since it pretty good fit.
+
+
+4. Suppose you want to choose a career path to maximize your SALARY. Which career path would you choose base on your model? (Detail which highest degree you should obtain in which major, which sector should your employer be, etc). 
+
+We can look up the coefficients of each variable.
+And based on summary(model.ls) we can conclude to maximize your salary you should be working at Computer and Math science group, working at a Business/Industry, with either Doctorate or Professional degree in Computer and Math science.
+
+
+## Regression 2: job satisfaction vs other variables
+
+Recode JOBSATIS into two categories: "satisfied" = "somewhat/very satisfied", and "not satisfied" = "somewhat/very dissatisfied". Build a logistic regression model to predict the recoded job satisfaction based on the other variables.
+
+```{r}
+
+jobsatisfied <- 0
+dataset$jobsatisfied[dataset$JOBSATIS[] == 1 | dataset$JOBSATIS[] == 2] <- 0
+dataset$jobsatisfied[dataset$JOBSATIS[] == 3 | dataset$JOBSATIS[] == 4] <- 1
+
+```
+1. Detail how you did variable selection: which models did you run, why did you discard certain models or variables, any variable transformations you did and why, which diagnostic tests did you run and what they showed, justifications if you removed outliers.  How did you decide to deal with missing values in this dataset? 
+
+
+I discard certain variables because I thought it wasn't relevent to the job satisfaction. For example there is no need to include variables like NWLAY and  NWNOND are not included since they are not relevent to job satisfaction. I used AUROC to test to predicting salary. Also it wasn't necessary to remove outliers since my model R^2 value is good without removing the outliers . Since the graph look okay I decide I do not need to deal with missing value
+
+```{r}
+model.YEAR <- glm(jobsatisfied ~ YEAR, data=dataset)
+summary(model.YEAR)
+model.WEIGHT <- glm(jobsatisfied ~ WEIGHT, data=dataset)
+summary(model.WEIGHT)
+model.SAMPLE <- glm(jobsatisfied ~ SAMPLE, data=dataset)
+summary(model.SAMPLE)
+model.SURID <- glm(jobsatisfied ~ SURID, data=dataset)
+summary(model.SURID)
+model.AGE <- glm(jobsatisfied ~ AGE, data=dataset)
+summary(model.AGE)
+model.GENDER <- glm(jobsatisfied ~ GENDER, data=dataset)
+summary(model.GENDER)
+model.MINRTY <- glm(jobsatisfied ~ MINRTY, data=dataset)
+summary(model.MINRTY)
+model.RACETH <- glm(jobsatisfied ~ RACETH, data=dataset)
+summary(model.RACETH)
+model.CHTOT <- glm(jobsatisfied ~ CHTOT, data=dataset)
+summary(model.CHTOT)
+model.CHU2IN <- glm(jobsatisfied ~ CHU2IN, data=dataset)
+summary(model.CHU2IN)
+model.CH25IN <- glm(jobsatisfied ~ CH25IN, data=dataset)
+summary(model.CH25IN)
+model.CH611IN <- glm(jobsatisfied ~ CH611IN, data=dataset)
+summary(model.CH611IN)
+model.CH1218IN <- glm(jobsatisfied ~ CH1218IN, data=dataset)
+summary(model.CH1218IN)
+model.CH19IN <- glm(jobsatisfied ~ CH19IN, data=dataset)
+summary(model.CH19IN)
+model.BA03Y5 <- glm(jobsatisfied ~ BA03Y5, data=dataset)
+summary(model.BA03Y5)
+model.NBAMEMG <- glm(jobsatisfied ~ NBAMEMG, data=dataset)
+summary(model.NBAMEMG)
+model.BADGRUS <- glm(jobsatisfied ~ BADGRUS, data=dataset)
+summary(model.BADGRUS)
+model.DGRDG <- glm(jobsatisfied ~ DGRDG, data=dataset)
+summary(model.DGRDG)
+model.HD03Y5 <- glm(jobsatisfied ~ HD03Y5, data=dataset)
+summary(model.HD03Y5)
+model.NDGMEMG <- glm(jobsatisfied ~ NDGMEMG, data=dataset)
+summary(model.NDGMEMG)
+model.HDDGRUS <- glm(jobsatisfied ~ HDDGRUS, data=dataset)
+summary(model.HDDGRUS)
+model.HRSWKGR <- glm(jobsatisfied ~ HRSWKGR, data=dataset)
+summary(model.HRSWKGR)
+model.WKSWKGR <- glm(jobsatisfied ~ WKSWKGR, data=dataset)
+summary(model.WKSWKGR)
+model.JOBINS <- glm(jobsatisfied ~ JOBINS, data=dataset)
+summary(model.JOBINS)
+model.JOBPENS <- glm(jobsatisfied ~ JOBPENS, data=dataset)
+summary(model.JOBPENS)
+model.JOBPROFT <- glm(jobsatisfied ~ JOBPROFT, data=dataset)
+summary(model.JOBPROFT)
+model.JOBVAC  <- glm(jobsatisfied ~ JOBVAC , data=dataset)
+summary(model.JOBVAC )
+model.FTPRET <- glm(jobsatisfied ~ FTPRET, data=dataset)
+summary(model.FTPRET)
+model.PTWTFT <- glm(jobsatisfied ~ PTWTFT, data=dataset)
+summary(model.PTWTFT)
+model.PTFAM <- glm(jobsatisfied ~ PTFAM, data=dataset)
+summary(model.PTFAM)
+model.PTNOND <- glm(jobsatisfied ~ PTNOND, data=dataset)
+summary(model.PTNOND)
+model.PTOCNA <- glm(jobsatisfied ~ PTOCNA, data=dataset)
+summary(model.PTOCNA)
+model.PTOTP <- glm(jobsatisfied ~ PTOTP, data=dataset)
+summary(model.PTOTP)
+model.OCEDRLP <- glm(jobsatisfied ~ OCEDRLP, data=dataset)
+summary(model.OCEDRLP)
+model.NOCPRMG <- glm(jobsatisfied ~ NOCPRMG, data=dataset)
+summary(model.NOCPRMG)
+model.EMSEC <- glm(jobsatisfied ~ EMSEC, data=dataset)
+summary(model.EMSEC)
+model.WAPRSM <- glm(jobsatisfied ~ WAPRSM, data=dataset)
+summary(model.WAPRSM)
+model.WASCSM <- glm(jobsatisfied ~ WASCSM, data=dataset)
+summary(model.WASCSM)
+model.SALARY <- glm(jobsatisfied ~ SALARY, data=dataset)
+summary(model.SALARY)
+model.NRREA <- glm(jobsatisfied ~ NRREA, data=dataset)
+summary(model.NRREA)
+model.NRSEC <- glm(jobsatisfied ~ NRSEC, data=dataset)
+summary(model.NRSEC)
+model.JOBSATIS <- glm(jobsatisfied ~ JOBSATIS, data=dataset)
+summary(model.JOBSATIS)
+model.SATADV <- glm(jobsatisfied ~ SATADV, data=dataset)
+summary(model.SATADV)
+model.SATBEN <- glm(jobsatisfied ~ SATBEN, data=dataset)
+summary(model.SATBEN)
+model.SATCHAL <- glm(jobsatisfied ~ SATCHAL, data=dataset)
+summary(model.SATCHAL)
+model.SATIND <- glm(jobsatisfied ~ SATIND, data=dataset)
+summary(model.SATIND)
+model.SATLOC <- glm(jobsatisfied ~ SATLOC, data=dataset)
+summary(model.SATLOC)
+model.SATRESP <- glm(jobsatisfied ~ SATRESP, data=dataset)
+summary(model.SATRESP)
+model.SATSAL <- glm(jobsatisfied ~ SATSAL, data=dataset)
+summary(model.SATSAL)
+model.SATSEC <- glm(jobsatisfied ~ SATSEC, data=dataset)
+summary(model.SATSEC)
+model.SATSOC <- glm(jobsatisfied ~ SATSOC, data=dataset)
+summary(model.SATSOC)
+model.MGRNAT <- glm(jobsatisfied ~ MGRNAT, data=dataset)
+summary(model.MGRNAT)
+model.MGROTH <- glm(jobsatisfied ~ MGROTH, data=dataset)
+summary(model.MGROTH)
+model.MGRSOC <- glm(jobsatisfied ~ MGRSOC, data=dataset)
+summary(model.MGRSOC)
+
+
+```
+
+
+
+
+
+2. Call your final regression model \texttt{model.lm}. Clearly show your final regression model: the R command, and the R output summary. Write down the equation that R gives you. Interpret all the coefficients and the $p$-values associated with the coefficients.
+
+
+
+```{r}
+
+library(InformationValue)
+library(ggplot2)
+```
+
+```{r}
+
+
+plotROC(dataset$jobsatisfied == 1 , model.YEAR$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SAMPLE$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SURID$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.AGE$fitted.values)
+
+```
+
+```{r}
+
+plotROC(dataset$jobsatisfied == 1 , model.GENDER$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.MINRTY$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.RACETH$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.CHU2IN$fitted.values)
+```
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.CH25IN$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.CH611IN$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.CH1218IN$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.CH19IN$fitted.values)
+```
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.BA03Y5$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.BADGRUS$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.DGRDG$fitted.values)
+
+```
+
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.HD03Y5$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.NDGMEMG$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.HDDGRUS$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.HRSWKGR$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.WKSWKGR$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.JOBINS$fitted.values)
+
+```
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.JOBPENS$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.JOBPROFT$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.JOBVAC $fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.FTPRET$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.PTWTFT$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.PTFAM$fitted.values)
+
+```
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.PTNOND$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.PTOCNA$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.PTOTP$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.OCEDRLP$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.NOCPRMG$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.EMSEC$fitted.values)
+```
+
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.WASCSM$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SALARY$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.NRREA$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.NRSEC$fitted.values)
+```
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.JOBSATIS$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SATBEN$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SATCHAL$fitted.values)
+```
+
+```{r}
+plotROC(dataset$jobsatisfied == 1 , model.SATIND$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SATRESP$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SATSAL$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SATSEC$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.SATSOC$fitted.values)
+plotROC(dataset$jobsatisfied == 1 , model.MGRSOC$fitted.values)
+```
+```{r}
+dataset.employed <- subset(dataset, dataset$LFSTAT ==1)
+dataset.employed$jobsatisfied[dataset.employed$JOBSATIS[]==1 | dataset.employed$JOBSAIT[] ==2] <- 1
+dataset.employed$jobsatisfied[dataset.employed$JOBSATIS[]==3 | dataset.employed$JOBSAIT[] ==4] <- 0
+
+
+model.jobsatisfiedROC <- glm(jobsatisfied~ DGRDG +NDGMEMG  + OCEDRLP + BA03Y5 + JOBPROFT + HRSWKGR + SALARY+ EMSEC + HD03Y5+ MGRNAT + NOCPRMG+ +JOBPENS+ SATADV + SATBEN + SATCHAL + SATIND+ SATLOC + SATRESP +SATSAL + SATSEC + SATSOC, data =dataset)
+summary(model.jobsatisfiedROC)
+```
+
+Equation will be y (Job satification)= (DGRDG2)2.369e-03+(all the variable in summary(model.jobsatisfiedROC)*(ESTIMATE))... + (SATSOC4)1.501e-01  )
+the coefficients indicate a decrease and increase if they are negative and positive.The p-value indicate the accuracy of the specific variables . Higher the p-value, variables are more likely not reliable. 
+
+
+
+3. Report your model's ROC curve , and report any diagnostic plots or statistics that you used. Is your model a good fit? Is it easy to interpret? 
+```{r}
+dataset.employed <- subset(dataset, dataset$LFSTAT ==1)
+dataset.employed$jobsatisfied[dataset.employed$JOBSATIS[]==1 | dataset.employed$JOBSAIT[] ==2] <- 1
+dataset.employed$jobsatisfied[dataset.employed$JOBSATIS[]==3 | dataset.employed$JOBSAIT[] ==4] <- 0
+
+
+model.jobsatisfiedROC <- glm(jobsatisfied~ DGRDG +NDGMEMG  + OCEDRLP  + JOBPROFT + HRSWKGR + SALARY+ EMSEC + MGRNAT + NOCPRMG+ +JOBPENS+ SATADV + SATBEN + SATCHAL + SATIND+ SATLOC + SATRESP +SATSAL + SATSEC + SATSOC, data =dataset)
+summary(model.jobsatisfiedROC)
+
+
+model.ROC <- model.jobsatisfiedROC$fitted.values
+plotROC(dataset.employed$jobsatisfied ==1, model.ROC)
+summary(model.ROC)
+
+```
+
+My AUROC do not have any supporting diagnostic plots to report but I assume the it will be fit science my AUROC graph look pretty good. It will be hard interpret since there are no missing diagnosic plots, but it seem unnecessary in this case.
+
+4. Suppose you want to choose a career path to maximize your job satisfaction. Which career path would you choose base on your model? (Detail which highest degree you should obtain in which major, which sector should your employer be, etc). 
+
+Based on my model, to maximize my job satisfaction you should work at non science job, at 2-year insitution, teaching that subject they were majored in.
+
+## Fact-check news outlets
+
+News outlets regularly examine relationships between degrees, job satisfaction and income. 
+Here are various claims from three different outlets. 
+
+1. Gallup: Does Higher Learning = Higher Job Satisfaction?
+\url{https://news.gallup.com/poll/6871/does-higher-learning-higher-job-satisfaction.aspx}
+
+This article claims that: 
+a. Education level has very little to do with job satisfaction, or satisfaction with income and time flexibility. 
+```{r}
+plot(dataset$DGRDG~dataset$JOBSATIS)
+```
+It's true since  education level and job satisfaction seem irrelevant.
+
+b. Having the opportunity to do what you do best is the one factor that correlates most highly with overall job satisfaction is.
+
+Question 7 show opportunity to do what you do best is the one factor that correlates most highly with overall job satisfaction is.
+
+2. Diverse Education: College-educated Americans More Likely Experience Job Satisfaction, Lead Healthier Lives, Study Says
+\url{https://diverseeducation.com/article/14156/}
+
+This article claims that:
+a. Certain race groups earn less than others when they have the same education level. 
+```{r}
+ds1 <- subset(dataset, DGRDG == 1)
+ds2 <- subset(dataset, DGRDG == 2)
+ds3 <- subset(dataset, DGRDG == 3)
+ds4 <- subset(dataset, DGRDG == 4) 
+
+anova(lm(ds1$SALARY ~ ds1$RACE))
+anova(lm(ds2$SALARY ~ ds2$RACE))
+anova(lm(ds3$SALARY ~ ds3$RACE))
+anova(lm(ds4$SALARY ~ ds4$RACE))
+```
+This is true since specific race groups earn less than others race groups even though when they have the same education level.
+
+b. STEM (science, technology, engineering and mathematics) careers, in which minorities are underrepresented, tend to pay more than careers in social sciences. 
+```{r}
+plot(dataset$SALARY~dataset$NOCPRMG)
+```
+True, STEM careers in social sciences tend to pay more than careers in social sciences.
+
+3. PEW: the rising cost of not going to college
+\url{https://www.pewsocialtrends.org/2014/02/11/the-rising-cost-of-not-going-to-college/}
+
+This article claims that:
+a. Those who studied science or engineering are the most likely to say that their current job is “very closely” related to their college or graduate field of study. 
+```{r}
+
+dataset$STEM[dataset$NDGMEMG == 1 | dataset$NDGMEMG == 2 | dataset$NDGMEMG == 3 | dataset$NDGMEMG == 5 | dataset$NDGMEMG == 6] <- 1
+dataset$STEM[is.na(dataset$STEM)] <- 0
+plot(dataset$OCEDRLP~dataset$STEM)
+
+dataset$STEM<- as.factor(dataset$STEM)
+```
+This is true since engineering more most likely to say that their current job is “very closely” related to their college or graduate field of study as graph indicate that has more grey part.
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Lay summary
+
+Give a two to three-page summary to highlight the findings in the technical report for the general public. Your summary should contain four sections:
+
+- highlights from the basic analysis
+
+Basic Analysis,
+
+I started from the population,sampling, and sampling method based on the article that was provided. It was refresh my brain memory and it was a good exercise to start this project. Then I move to summarizing the distributiona and demographic of the data. I used plot and boxplot to anaylze the data.
+For example
+```{r}
+boxplot(as.numeric(dataset$BA03Y5)~dataset$NBAMEMG)
+boxplot(as.numeric(dataset$HD03Y5)~dataset$NDGMEMG)
+```
+The graphing and plot was very first thing I learned from the R and it was overall good practice to use them again. Then I need figure which test I need to use to figure out what kind of tests I need to use to check if they are indenpendent from each other or not. I choosed chi squared test to test the p-values and test the null hypothesis. Figuring out what kind of test made me think a lot of different tests since there are many different way to test this. Writing null,alternative,test are fundamental of the statistic and overall this analysis was simple and close to fundamental of statistic.
+
+dataset$NBAMEMG[dataset$NBAMEMG == "9" | dataset$NBAMEMG == "96"] <- NA
+dataset$NBAMEMG <- droplevels(dataset$NBAMEMG) 
+higherdegree <- subset(dataset, DGRDG!=1)
+
+samedegree <- subset(higherdegree, NBAMEMG == NDGMEMG)
+notsamedegree <- subset(higherdegree, NBAMEMG != NDGMEMG)
+
+
+samedegree.tb <- table(samedegree$NBAMEMG)
+notsamedegree.tb <- table(notsamedegree$NBAMEMG)
+total <- rbind(samedegree.tb, notsamedegree.tb)
+total <- total[,-9]
+row.sum=apply(total,1,sum)
+col.sum=apply(total,2,sum)
+expected = row.sum %*% t(col.sum)/ sum(col.sum)
+names(dimnames(total)) <- c("Retention", "Degree Field")
+total
+
+chi.sq = sum((total-expected)**2/expected)
+p.value = 1-pchisq(chi.sq,df=7)
+p.value
+
+
+- highlights from the salary model
+
+For this model I used linear regression model to to predicting salary
+I discard certain variables because I thought it wasn't relevent to the salary. For example there is no need to include variables like NWOTP and NEWSTU since those are Reasons for not working: illness, retired or other (combined) and Reasons for not working: student which mean they are unemployed and 
+no need to include in my model. . Also itw wasn't necessary to remove outliers since my model R^2 value is good without removing the outliers . Since the graph look okay I decide I do not need to deal with missing value. Most difficult part was looking for each variables to see which variables are either good or bad to put in my models. This process consume a lot time then I expected and it was one of most difficult part to do it.
+
+```{r}
+plot(model.lm)
+```
+you can see that my model is a pretty decent model since graph seem good fit and has somewhat good R^2 value.
+
+- highlights from the job satisfaction model
+
+
+For this secion I need to predicing the job satisfcation. 
+I discard certain variables because I thought it wasn't relevent to the job satisfaction. For example there is no need to include variables like NWLAY and  NWNOND are not included since they are not relevent to job satisfaction. I used AUROC to test to predicting
+```{r}
+plotROC(dataset.employed$jobsatisfied ==1, model.ROC)
+```
+
+as you can see the graph, my AUROC look pretty good. There might be to more optimize by find or discard either better or unnecessary variables. But it seem look fine to me.
+
+- highlights from the fact-check section
+
+
+for fact-check it was pretty straight forward  and similar previous data(basic analysis, model, satisfcation model) to answer them . There was bit complicate one, For example when question asked who studied science or engineering are the most likely to say that their current job is “very closely” related to their college or graduate field of study. 
+I need to create another data set to anaylze,
+
+
+dataset$STEM[dataset$NDGMEMG == 1 | dataset$NDGMEMG == 2 | dataset$NDGMEMG == 3 | dataset$NDGMEMG == 5 | dataset$NDGMEMG == 6] <- 1
+dataset$STEM[is.na(dataset$STEM)] <- 0
+plot(dataset$OCEDRLP~dataset$STEM)
+
+ but other than this one it was pretty straigh-forward and required simple graph to answer them.
+

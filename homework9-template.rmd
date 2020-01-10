@@ -1,0 +1,222 @@
+---
+title: 'Homework 9: Regression: diagnostics'
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    fig_height: 8.5
+    fig_width: 8.5
+date: 'due date: Tuesday November 12th, 2019'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(openintro)
+```
+
+# Lecture revision
+
+1. What is a linear regression model of $Y$ vs $X$?
+
+A linear relationship between data is $y = f(x) + \text{noise}$, where $f(x)$ is a linear function.
+
+2. What are the model's assumptions? How can you assess these assumptions with diagnostic plots?
+
+The assumptions for a linear regression are:1. Normal distribution: for eachx,(x)is a normal random variable.2. Mean 0:E((x)) = 0. This means that the line of best fit goes through the center of the data.3. Constant variance: the variance of (x)does not depend onx. This means there is no fanning in/out.4. For differentx’s, the random variables (x)’s are independent of each other. No patterns in the residual
+
+# Diagnostic plots for various models
+
+A statistician fitted several regression models to different variable pairs. For each model, she ran diagnotic plots for the residuals. For each of six residual plots in this homework, say which, if any, of the assumptions are violated. 
+Based on your answer, which models are good fits? 
+
+1.
+This Graph doesn't violate any assumptionn
+
+2.
+
+residuals vs fitted plot is not flat so  it's not indenpendent of each other and lots of point off the dotted line for Normal Q-Q so fails normality.
+
+
+3.
+Residuals vs Fitted is not flat and scale vs location is not flat which mean constant variance is not okay and lots of point off the dotted line for Normal Q-Q so fails normality.
+
+4 
+fails the constant vairace and indenpendent assumptions because  reidsual vs fitted and scale - location graph is not flat.
+
+
+5
+fails the constant vairace,indenpendent, and normality assumptions because  reidsual vs fitted and scale - location graph is not flat and lots of point off the dotted line for Normal Q-Q.
+
+6
+This Graph doesn't violate any assumption
+
+
+# Simple linear regression
+
+For each of the following regression problems:
+
+1. Fit a linear regression model. Produce the diagnostic plots, and comment on which model assumptions are violated, if any. 
+
+2. Print the model summary, write down the equation that R fitted through the data, and interpret the coefficients in the context of the dataset. 
+
+3. Interpret the p-values for the coefficients of your model in the problem's context.
+
+## List of problems 
+Note: we always write $Y$ vs $X$, so science vs math means science is the y-variable and math is the x-variable
+
+* science vs math from \texttt{hsb2} in \texttt{library(openintro)}
+```{r}
+data(hsb2)
+class(hsb2$science)
+class(hsb2$math)
+plot(hsb2$science ~ hsb2$math)
+hsb2.model1 = lm(science ~ math, data = hsb2)
+hsb2.model1
+abline(hsb2.model1$coef, col="red")
+plot(hsb2.model1)
+summary(hsb2.model1)
+
+```
+
+
+
+y= 16.75789 + 0.66658 * x
+
+$a$ - the average science score is 21.0382 when math scores equal to 0.6051, .
+$b$ - represent the change of the science scores as the math score increase.
+
+x indicate math score and y indicate science score.
+
+Since p-value is smaller than > 0.05 , we can reject the null hpyothesis that math and science score are not related.
+
+* socst vs math from \texttt{hsb2} in \texttt{library(openintro)}
+```{r}
+data(hsb2)
+class(hsb2$socst)
+class(hsb2$math)
+plot(hsb2$socst ~ hsb2$math)
+hsb2.model2 = lm(socst ~ math, data = hsb2)
+hsb2.model2
+abline(hsb2.model2$coef, col="red")
+plot(hsb2.model2)
+summary(hsb2.model2)
+
+```
+
+
+
+$a$ - the average sosct score is 21.0382 when average math scores equal to zero, 
+$b$ - represent the change of the sosct scores as the math score increase.
+
+x indicate math score and y indicate socat score.
+
+Since p-value is smaller than > 0.05 , we can reject the null hpyothesis that math and socat score are not related.
+
+the normality test for the socst vs math regression failed
+
+* $socst^2$ vs math from \texttt{hsb2} in \texttt{library(openintro)}
+
+```{r}
+data(hsb2)
+class(hsb2$socst**2)
+class(hsb2$math)
+plot(hsb2$socst**2 ~ hsb2$math)
+hsb2.model3 = lm(socst**2 ~ math, data = hsb2)
+hsb2.model3
+abline(hsb2.model3$coef, col="red")
+plot(hsb2.model3)
+summary(hsb2.model3)
+
+```
+
+y= 19.55724 + 0.62395* x
+
+$a$ - the average sosct^2 score is 21.0382 when average math scores equal to zero, 
+$b$ - represent the change of the sosct^2 scores as the math score increase.
+
+x indicate math score and y indicate socat^2 score.
+
+Since p-value is larger than > 0.05 , we can'treject the null hpyothesis that math and socat^2 score are not related.
+
+the normality test for the socst^2 vs math regression failed
+
+
+* $socst^2$ vs math from \texttt{hsb2} in \texttt{library(openintro)}
+# Regression in practice
+
+\textbf{Setup.} Suppose that you work for a fancy restaurant that often buy abalone in huge quantities. You want to decide if it's better to buy abalone as a whole ("in shell"), shucked (meat only), or dried. Let's say that the dried weight equals the cooked weight, for simplicity. The market price for abalone is as follows:
+\begin{itemize}
+  \item Whole: 70 USD per kilo
+  \item Shucked: 700 USD per kilo
+  \item Dried: 1200 USD per kilo
+\end{itemize}
+At these prices, your task is to decide what is most economical for your restau
+rant? 
+\vskip12pt
+The data file, abalone.csv, is on Canvas. For variable descriptions, see abalone-descrip.txt. 
+\vskip12pt
+\textbf{Tasks.} 
+\begin{enumerate}
+  \item Build a model with reasonable fit to predict dried weight based on whole weight.
+  \item Build a model with reasonable fit to predict dried weight based on shucked weight.
+  \item From your models, make a recommendation for your restaurant on what is the most economical type of abalone to buy (cheapest price and yield the most dried weight). 
+\end{enumerate}
+```{r}
+setwd("/Users/williamkwon/Documents/R project folder")
+data <- read.csv("abalone.csv", header = T)
+plot(data$shWeight ~ data$wWeight)
+hsb2.model5 = lm(log(shWeight) ~log(wWeight) , data = data)
+abline(hsb2.model5$coef, col="red")
+plot(hsb2.model5)
+summary(hsb2.model5)
+
+```
+
+
+log(dried weight) = -1.251610 + 0.954257(log(whole weight)
+\textbf{Notes and hints.}
+```{r}
+
+
+plot(data$shWeight ~ data$sWeight)
+hsb2.model4 = lm(log(shWeight) ~log(sWeight) , data = data)
+hsb2.model4
+abline(hsb2.model4$coef, col="red")
+plot(hsb2.model4)
+summary(hsb2.model4)
+
+```
+
+log(dried weight) = -0.509224  + 0.900589(log(shucked weight)
+
+by using logarithmic equation
+
+e^[(log(1000) - intercept)/coefficient]
+
+At 1000g or 1kg whole meat price in 1kg compare to dried meat e^[(log(1000) - 1.251610/0.954257] = 5.41077950655
+
+where as shucked meat price in 1kg compare to dried meat
+
+e^[(log(1000) - -0.509224/0.900589] = 35.3548081638
+
+so it is better to get whole meat is more economically beneficial since it has lower price.
+
+* For each of your chosen model, you MUST include diagnostic plots, R's model summary, and write down the model's equation. Point out any assumptions that could be violated by your model.
+
+* For better fits, consider simple transformations such as $\sqrt{y}$, $\log(y)$, $\log(x)$, or include terms such as $x^2$ in your model. 
+
+* This is a moderately large and complex dataset, so don't expect textbook-like goodness of fits. However, if some assumptions are clearly violated (eg: independence), you should try transformations to address them. 
+
+\textbf{Background on this problem.} This is a real problem faced by real fisheries. It is not necessary for this regerssion task, but may be of interest to you to understand the applications of your model. 
+\vskip12pt
+
+
+NY times article on abalone:
+
+\url{https://www.nytimes.com/2014/07/27/sports/in-hunt-for-red-abalone-divers-face-risks-and-poachers-face-the-law.html}
+
+Another article on abalone pricing: 
+
+\url{https://www.businesslive.co.za/fm/features/2017-10-26-the-fascinating-price-of-abalone/}
+
+
